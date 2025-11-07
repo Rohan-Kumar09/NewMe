@@ -1,15 +1,22 @@
 "use client"; // <-- Add this at the very top
 
-import { useState } from "react";
+import { useEffect } from "react";
 import "@fontsource/lexend";
 import Link from "next/link";
 
-export default function Home() {
-  const [sliderPos, setSliderPos] = useState(50);
+// avoid JSX intrinsic checks for the custom web component by using a runtime tag alias
+const ImgComparison: any = "img-comparison-slider";
 
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSliderPos(Number(e.target.value));
-  };
+export default function Home() {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (document.querySelector('script[data-img-comparison]')) return;
+    const s = document.createElement("script");
+    s.src = "https://unpkg.com/img-comparison-slider@7/dist/index.js";
+    s.defer = true;
+    s.setAttribute("data-img-comparison", "1");
+    document.body.appendChild(s);
+  }, []);
 
   return (
     <div
@@ -28,52 +35,28 @@ export default function Home() {
         The possibilities are endless — AI reinvents your style, no scissors required.
       </p>
 
-      <div className="relative mt-10 w-80 h-80 md:w-[500px] md:h-[400px] overflow-hidden shadow-lg bg-[#152f40ff]">
-        {/* AFTER IMAGE (bottom layer) */}
-        <img
-          src="/images/after-homepage.png"
-          alt="After"
-          className="absolute top-0 left-0 w-full h-full object-contain"
-        />
-        {/* BEFORE IMAGE (top layer) */}
-        <img
-          src="/images/before-homepage.png"
-          alt="Before"
-          className="absolute top-0 left-0 h-full object-contain"
-          style={{ width: `${100 - sliderPos}%` }}
-        />
+      <div className="flex flex-row items-center">
+        <div className="px-3">before</div>
+        <div className="relative mt-10 w-auto h-auto overflow-hidden shadow-lg bg-[#152f40ff]">
+          <ImgComparison style={{  }}>
+            <img
+              slot="first"
+              src="/images/before-homepage.png"
+              alt="Before"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            <img
+              slot="second"
+              src="/images/after-homepage.png"
+              alt="After"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+          </ImgComparison>
+        </div>
 
-        {/* Slider */}
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={sliderPos}
-          onChange={handleSliderChange}
-          className="absolute bottom-2 left-0 w-full appearance-none h-1 rounded-lg cursor-pointer"
-          style={{
-            background: "linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899)", // blue → purple → pink
-          }}
-        />
-
-        {/* Custom slider thumb for Chrome */}
-        <style jsx>{`
-          input[type='range']::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 15px;
-            width: 15px;
-            background: white;
-            border-radius: 0;
-            cursor: pointer;
-            margin-top: -7px; /* adjust to center on track */
-            transform: rotate(45deg); /* diamond shape */
-          }
-        `}</style>
-      </div>
-
-      <div className="flex justify-between w-80 md:w-[500px] mt-2 text-sm font-bold text-black">
-        <span>Before</span>
-        <span>After</span>
+        <div className="px-3">
+          <span>After</span>
+        </div>
       </div>
 
       {/* ✨ New text below the image */}
@@ -84,7 +67,7 @@ export default function Home() {
       {/* 🌈 Try it Now button */}
       <Link href="/try_it_now">
         <button
-          className="mt-4 w-36 h-10 text-black text-lg rounded-full border-1 border-black shadow-md transition-transform transform hover:scale-105"
+          className="mt-4 w-36 h-10 text-black text-lg rounded-full border border-black shadow-md transition-transform transform hover:scale-105"
           style={{
             background: "#8df6ddff",
           }}

@@ -17,22 +17,28 @@ export default function Navbar() {
             height={50}
             className="mr-4 object-contain"
           />
-          <span
-            className="text-black"
-            style={{ fontFamily: "'Comfortaa', sans-serif", fontWeight: 500, fontSize: "1.5rem" }}
-          >
+          <span className="text-black font-medium text-2xl font-['Comfortaa',sans-serif]">
             NewMe
           </span>
         </Link>
 
-        {/* Login Button */}
-        <Link
-          href="/api/auth/google"
-          className="ml-4 inline-flex items-center px-4 py-2 text-black text-sm font-medium hover:underline"
-          style={{ fontFamily: "'Comfortaa', sans-serif", fontWeight: 500, fontSize: "1.5rem" }}
-        >
-          Login
-        </Link>
+        <div className="">
+          {/* Nav Buttons */}
+            <Link
+              href="/gallery"
+              className="ml-4 inline-flex items-center px-4 py-2 text-black text-2xl font-medium hover:underline font-['Comfortaa',sans-serif]"
+            >
+            Gallery
+            </Link>
+
+            {/* Login Button */}
+            <Link
+              href="/api/auth/google"
+              className="ml-4 inline-flex items-center px-4 py-2 text-black text-2xl font-medium hover:underline font-['Comfortaa',sans-serif]"
+            >
+            Login
+            </Link>
+        </div>
       </div>
     </header>
   );

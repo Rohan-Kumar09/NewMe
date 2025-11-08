@@ -1,23 +1,10 @@
-"use client"; // <-- Add this at the very top
+"use client";
 
-import { useEffect } from "react";
+import ImageComp from "./components/ImageComp";
 import "@fontsource/lexend";
 import Link from "next/link";
 
-// avoid JSX intrinsic checks for the custom web component by using a runtime tag alias
-const ImgComparison: any = "img-comparison-slider";
-
 export default function Home() {
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (document.querySelector('script[data-img-comparison]')) return;
-    const s = document.createElement("script");
-    s.src = "https://unpkg.com/img-comparison-slider@7/dist/index.js";
-    s.defer = true;
-    s.setAttribute("data-img-comparison", "1");
-    document.body.appendChild(s);
-  }, []);
-
   return (
     <div
       className="min-h-screen flex flex-col items-center pt-15 text-black bg-[#8df6ddff]"
@@ -36,26 +23,35 @@ export default function Home() {
       </p>
 
       <div className="flex flex-row items-center">
-        <div className="px-3">before</div>
-        <div className="relative mt-10 w-auto h-auto overflow-hidden shadow-lg bg-[#152f40ff]">
-          <ImgComparison style={{  }}>
-            <img
-              slot="first"
-              src="/images/before-homepage.png"
-              alt="Before"
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            <img
-              slot="second"
-              src="/images/after-homepage.png"
-              alt="After"
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-          </ImgComparison>
+        <div className="px-3 text-xl">before</div>
+        <ImageComp
+          firstSrc="/images/before-homepage.png"
+          secondSrc="/images/after-homepage.png"
+          className="my-5 mx-3"
+        />
+        <div className="px-3 text-xl"><span>After</span></div>
+      </div>
+
+      {/* Examples showing size/width props for ImageComp */}
+      <div className="flex flex-row items-center">
+        {/* Example 1: fixed 100x100 (not responsive) */}
+        <div className="mx-3">
+          <ImageComp
+            firstSrc="/images/original_photos.png"
+            secondSrc="/images/styled_photos.png"
+            size={100}
+            responsive={false}
+            fit="cover"
+          />
         </div>
 
-        <div className="px-3">
-          <span>After</span>
+        {/* Example 2: responsive max width 300px (scales with parent) */}
+        <div className="mx-3 w-[300px]"> 
+          <ImageComp
+            firstSrc="/images/original_photos.png"
+            secondSrc="/images/styled_photos.png"
+            fit="contain"
+          />
         </div>
       </div>
 

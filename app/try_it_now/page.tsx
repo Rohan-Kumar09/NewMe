@@ -5,8 +5,8 @@ export default function TryitNow() {
     <div
       className="min-h-screen flex flex-col items-center pt-15 text-black bg-[#8df6ddff] font-['Lexend',sans-serif] bg-[radial-gradient(#fef5fe_2px,transparent_2px),radial-gradient(#fef5fe_2px,transparent_2px)] bg-size-[80px_80px] bg-position-[0_0,40px_40px] bg-blend-overlay"
     >
-      <p className="text-[1.5rem]">Start Your Style Adventure</p>
-      <p className="text-lg mt-5 text-black text-center">
+      <p className="text-[30px]">Start Your Style Adventure</p>
+      <p className="text-[18px] mt-5 text-black text-center">
         Explore new hairstyles and colors from your Google Photos! Let AI spark <br /> your creativity — it’s fun, easy, and completely safe.
       </p>
 

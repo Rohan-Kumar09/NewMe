@@ -11,7 +11,7 @@ export default function Navbar() {
       style={{ backgroundColor: "#b7fff9ff" }}
     >
       <div className="flex h-full items-center justify-between px-6">
-        <div className="flex items-center justify-center w-1/6">
+        <div className="flex items-center justify-center">
           <Link href="/" className="flex items-center no-underline" aria-label="Home">
             <Image
               src="/images/logo.png"
@@ -20,7 +20,7 @@ export default function Navbar() {
               height={48}
               className="object-contain"
             />
-            <span className="ml-2 text-black font-medium text-2xl font-['Comfortaa',sans-serif]">
+            <span className="ml-2 text-black font-semibold text-2xl font-['Comfortaa',sans-serif]">
               NewMe
             </span>
           </Link>

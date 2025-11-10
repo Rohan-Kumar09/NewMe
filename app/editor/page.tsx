@@ -1,37 +1,229 @@
 "use client";
 import { useState } from "react";
+import "@fontsource/lexend";
+import "@fontsource/comfortaa";
 
 export default function EditorPage() {
   const [color, setColor] = useState("");
   const [style, setStyle] = useState("");
 
+  const [showColors, setShowColors] = useState(false); // 👈 controls list visibility
+  const [showHairstyles, setShowHairstyles] = useState(false);
+
+  const [isApplied, setIsApplied] = useState(false);
+
+  const hairColors = [
+    "Blonde",
+    "Black",
+    "Auburn",
+    "Brown",
+    "Red",
+    "Silver",
+    "Pink",
+    "Lavender",
+    "Blue Ombre",
+    "Burgundy",
+    "Vibrant Green",
+  ];
+
+  const trendingHairstyles = [
+    "Ponytail",
+    "Braid",
+    "Bob Cut",
+    "Curly Layers",
+    "Pixie Cut",
+    "Beach Waves",
+    "Straight Bangs",
+    "Braided Updo",
+    "Shaggy Mullet",
+    "Mohawk",
+    "Bowl Cut",
+    "Pompadour",
+    "Fluffy Cut",
+    "Buzz Cut",
+    "Undercut",
+    "Messy Fringe",
+    "Man Bun",
+    "Beard",
+  ];
+
   return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-4">Editor</h1>
+    <div
+      className="min-h-screen flex flex-row text-black bg-[#8df6ddff]"
+      style={{ fontFamily: "'Lexend', sans-serif", 
+        backgroundColor: "#8df6ddff", // base color stays
+        backgroundImage:
+          "radial-gradient(#fef5fe 2px, transparent 2px), radial-gradient(#fef5fe 2px, transparent 2px)", // white dots
+        backgroundSize: "80px 80px",
+        backgroundPosition: "0 0, 40px 40px",
+        backgroundBlendMode: "overlay", // makes sure base color shows through
+      }}
+    >
+      {/* LEFT SIDEBAR */}
+      <div
+        className="w-[220px] bg-[#152f40ff] shadow-md border-r border-white flex flex-col items-center py-5 h-screen overflow-y-auto"
+        style={{ fontFamily: "'Comfortaa', sans-serif" }} // 👈 apply Comfortaa only here
+      >
+        <h1 className="text-white text-lg font-medium text-[20px] mb-5">✨ Style Inspiration</h1>
 
-      <div className="max-w-xl space-y-4">
-        <label className="block">
-          <span className="text-sm">Hair color</span>
-          <input
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            placeholder="e.g. Pink"
-            className="w-full mt-1 px-3 py-2 border rounded"
-          />
-        </label>
+        <div className="flex flex-col space-y-0 text-white font-medium text-[18px]">
+          {/* Popular Hair Colors */}
+          <button 
+            onClick={() => setShowColors(!showColors)}
+            className="border border-white px-4 py-2"
+          >
+            Popular Hair Colors
+          </button>
 
-        <label className="block">
-          <span className="text-sm">Hairstyle</span>
-          <input
-            value={style}
-            onChange={(e) => setStyle(e.target.value)}
-            placeholder="e.g. Mohawk, No beard"
-            className="w-full mt-1 px-3 py-2 border rounded"
-          />
-        </label>
+          {/* Conditional list */}
+            {showColors && (
+              <ul className="list-disc text-white text-sm mt-5 mb-5 ml-10 space-y-1 text-left text-[18px]">
+                {/* First group */}
+                {hairColors.slice(0, 5).map((color, index) => (
+                  <li key={index}>{color}</li>
+                ))}
 
-        <button className="px-4 py-2 bg-indigo-600 text-white rounded">Apply</button>
+                {/* Gap before second group */}
+                <div className="mt-6"></div>
+
+                {/* Second group */}
+                {hairColors.slice(5).map((color, index) => (
+                  <li key={index + 5}>{color}</li>
+                ))}
+              </ul>
+            )}
+
+          {/* Trending Hairstyles */}
+          <button
+            onClick={() => setShowHairstyles(!showHairstyles)}
+            className="border border-white px-4 py-2"
+          >
+            Trending Hairstyles
+          </button>
+
+          {/* Conditional list */}
+            {showHairstyles && (
+              <ul className="list-disc text-white text-sm mt-5 mb-5 ml-10 space-y-1 text-left text-[18px]">
+                {/* First group */}
+                {trendingHairstyles.slice(0, 9).map((style, index) => (
+                  <li key={index}>{style}</li>
+                ))}
+
+                {/* Gap before second group */}
+                <div className="mt-6"></div>
+
+                {/* Second group */}
+                {trendingHairstyles.slice(9).map((style, index) => (
+                  <li key={index + 9}>{style}</li>
+                ))}
+              </ul>
+            )}
+        </div>
       </div>
+
+      {/* MAIN CONTENT AREA */}
+      <div className="flex flex-col items-center flex-1 pt-15">
+        <p className="text-[40px]">Experiment and Get Creative</p>
+
+        {/* White Rectangle Container */}
+        <div className="bg-white rounded-sm shadow-lg w-[910px] h-[470px] flex overflow-hidden border border-gray-200 mt-10">
+          {/* Left Side */}
+          <div className="w-1/2 flex flex-col items-center justify-start p-6 mt-4">
+            {/* Image placeholder */}
+            <div className="w-[310px] h-[310px] bg-gray-300 rounded-md mb-4 flex items-center justify-center">
+              <span className="text-gray-600 text-sm">Image</span>
+            </div>
+            {/* Description */}
+            <p className="w-[285px] text-sm text-black text-center">
+              This represents your current look. Customize the options on the right to see changes.
+            </p>
+          </div>
+
+         {/* Divider */}
+          <div className="mt-10 mb-10 w-[1px] bg-black"></div>
+
+        {/* Right Side */}
+          <div className="w-1/2 flex flex-col justify-center items-center p-6 space-y-4">
+            <h2 className="text-[25px] font-medium text-black text-center">
+              What would you like to customize?
+            </h2>
+
+            <div className="w-[90%] space-y-4">
+              {/* Hair color input with image */}
+              <label className="flex flex-col items-start">
+                <span className="mt-3 text-[16px] text-[#434343] ml-[89px] mb-1">Hair color</span>
+                <div className="flex items-center justify-center space-x-7">
+                  <img
+                    src="/images/color_wheel.png"
+                    alt="Color Wheel"
+                    className="w-12 h-12 object-contain"
+                  />
+                  <input
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    placeholder="e.g. Pink"
+                    className="w-80 flex-1 px-3 py-2 text-[18px] bg-[#b7fff9ff] border-1 border-black rounded focus:outline-none"
+                  />
+                </div>
+              </label>
+
+
+              {/* Hairstyle input with image */}
+              <label className="flex flex-col items-start">
+                <span className="mt-3 text-[16px] text-[#434343] ml-[89px] mb-1">Hairstyle</span>
+                <div className="flex items-center justify-center space-x-7">
+                  <img
+                    src="/images/comb_and_scissors.png"
+                    alt="Comb and Scissors"
+                    className="w-12 h-12 object-contain"
+                  />
+                  <input
+                    value={style}
+                    onChange={(e) => setStyle(e.target.value)}
+                    placeholder="e.g. Mohawk, No beard"
+                    className="w-80 flex-1 px-3 py-2 text-[18px] bg-[#b7fff9ff] border-1 border-black rounded focus:outline-none"
+                  />
+                </div>
+              </label>
+
+              <div className="flex justify-center mt-4">
+                <button 
+                 onClick={() => setIsApplied(true)}
+                 className="mt-4 px-5 py-2 bg-[#b7fff9ff] text-black border-1 border-black rounded-sm"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Buttons BELOW the white rectangle */}
+        <div className="mt-12 flex space-x-15">
+          {/* Delete button */}
+          <button className="px-4 py-2 space-x-3 bg-transparent text-black rounded-full hover:bg-red-600 flex items-center space-x-2 border-1 border-black text-[18px]">
+            <img
+              src="/images/trashcan.png"
+              alt="Trashcan"
+              className="w-6 h-6 object-contain"
+            />
+            <span>Delete</span>
+          </button>
+
+          {/* Save the NewMe button */}
+          <button
+            disabled={!isApplied}
+            className={`px-4 py-2 rounded-full border border-black text-[18px] flex items-center justify-center transition ${
+              isApplied
+                ? "bg-transparent text-black"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+          >
+            Save the NewMe
+          </button>
+        </div>
+      </div>
+
     </div>
   );
 }

@@ -20,7 +20,7 @@ export default function Navbar() {
               alt="NewMe logo"
               width={48}
               height={48}
-              className="object-contain"
+              className="w-12 h-12 object-contain"
             />
             <span className="ml-2 text-black font-semibold text-2xl font-['Comfortaa',sans-serif]">
               NewMe

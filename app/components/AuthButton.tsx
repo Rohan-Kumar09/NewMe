@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 type User = { name?: string | null; email?: string | null; picture?: string | null };
 
@@ -66,8 +67,7 @@ export default function AuthButton() {
     return (
       <div ref={containerRef} className="relative inline-flex items-center">
         {user?.picture ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={user.picture}
             alt={user.name ?? 'avatar'}
             width={36}

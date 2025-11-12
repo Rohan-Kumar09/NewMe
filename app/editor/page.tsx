@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import GooglePhotosPicker from "../components/GooglePhotosPickerNew";
+import { downloadUrlAsFile } from "../utils/download";
 
 export default function EditorPage() {
   const [color, setColor] = useState("");
@@ -75,7 +76,7 @@ export default function EditorPage() {
     console.log('✅ [PAGE] handlePhotoSelect COMPLETE');
   }
 
-  // Download the currently selected photo (fetch -> blob -> trigger browser download)
+  // Download the currently selected photo using shared utility
   async function downloadSelectedPhoto() {
     if (!selectedPhoto) {
       console.warn('No selected photo to download');
@@ -84,49 +85,7 @@ export default function EditorPage() {
 
     try {
       setIsDownloading(true);
-
-      const res = await fetch(selectedPhoto, { method: 'GET', credentials: 'same-origin' });
-
-      if (!res.ok) {
-        console.error('Failed to fetch image for download', res.status, res.statusText);
-        // Attempt to read error body for more detail
-        try {
-          const text = await res.text();
-          console.error('Response body:', text);
-        } catch (e) {}
-        alert('Failed to download image. Please try again or re-authenticate.');
-        return;
-      }
-
-      const blob = await res.blob();
-
-      // Determine filename from Content-Disposition if present, otherwise fallback
-      let filename = `newme-${new Date().toISOString().replace(/[:.]/g, '-')}.jpg`;
-      try {
-        const cd = res.headers.get('Content-Disposition') || res.headers.get('content-disposition');
-        if (cd) {
-          const m = cd.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
-          if (m && m[1]) filename = decodeURIComponent(m[1]);
-        } else {
-          const ct = res.headers.get('Content-Type') || '';
-          if (ct.includes('png')) filename = filename.replace('.jpg', '.png');
-          else if (ct.includes('gif')) filename = filename.replace('.jpg', '.gif');
-        }
-      } catch (e) {
-        // ignore and use fallback
-      }
-
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      // Append to DOM to make click work in some browsers
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-
-      console.log('Image downloaded as', filename);
+      await downloadUrlAsFile(selectedPhoto);
     } catch (err) {
       console.error('Error downloading image', err);
       alert('An unexpected error occurred while downloading the image.');

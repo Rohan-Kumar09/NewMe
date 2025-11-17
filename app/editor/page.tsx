@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import GooglePhotosPicker from "../components/GooglePhotosPickerNew";
+import VisionResults from "../components/VisionResults";
 import { downloadUrlAsFile } from "../utils/download";
 
 export default function EditorPage() {
@@ -18,6 +19,11 @@ export default function EditorPage() {
   // Google Photos picker state
   const [showPhotoPicker, setShowPhotoPicker] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  // Vision UI state
+  const [visionData, setVisionData] = useState<any | null>(null);
+  const [isVisionLoading, setIsVisionLoading] = useState(false);
+  const [visionError, setVisionError] = useState<string | null>(null);
+  const [showVisionPanel, setShowVisionPanel] = useState(false);
 
   // Monitor selectedPhoto state changes
   useEffect(() => {
@@ -73,7 +79,38 @@ export default function EditorPage() {
     setSelectedPhoto(photoUrl);
     console.log('🎯 [PAGE] Closing photo picker...');
     setShowPhotoPicker(false);
+    console.log('🔍 [PAGE] Automatically triggering Vision API analysis...');
+    analyzePhoto(photoUrl);
     console.log('✅ [PAGE] handlePhotoSelect COMPLETE');
+  }
+
+  // Send selected (proxied/resized) image to server Vision endpoint
+  async function analyzePhoto(photoUrl: string) {
+    if (!photoUrl) return;
+    setVisionError(null);
+    setIsVisionLoading(true);
+    try {
+      const res = await fetch('/api/photos/vision', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageUrl: photoUrl }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'Vision API error');
+      }
+
+      const data = await res.json();
+      console.log('🔍 [VISION] Response', data);
+      setVisionData(data);
+      setShowVisionPanel(true); // Auto-open panel on successful analysis
+    } catch (err) {
+      console.error('❌ [VISION] Error', err);
+      setVisionError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsVisionLoading(false);
+    }
   }
 
   // Download the currently selected photo using shared utility
@@ -171,7 +208,7 @@ export default function EditorPage() {
           {/* Left Side */}
           <div className="w-1/2 flex flex-col items-center justify-start p-6 mt-4">
             {/* Image placeholder */}
-            <div className="w-[310px] h-[310px] bg-gray-300 rounded-md mb-4 flex items-center justify-center overflow-hidden">
+            <div className="w-[310px] h-[310px] bg-gray-300 rounded-md mb-4 flex items-center justify-center overflow-hidden relative">
               {selectedPhoto ? (
                 <>
                   {console.log('🖼️ [RENDER] Rendering image with URL:', selectedPhoto)}
@@ -187,6 +224,13 @@ export default function EditorPage() {
                       console.error('❌ [IMAGE] Error event:', e);
                     }}
                   />
+                  {/* Loading overlay during Vision API analysis */}
+                  {isVisionLoading && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-3"></div>
+                      <span className="text-white text-sm font-medium">Processing image...</span>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -258,11 +302,18 @@ export default function EditorPage() {
               </label>
 
               <div className="flex justify-center mt-4">
-                <button 
-                 onClick={() => setIsApplied(true)}
-                 className="mt-4 px-5 py-2 bg-[#b7fff9ff] text-black border border-black rounded-sm"
+                <button
+                  onClick={() => {
+                    setIsApplied(true);
+                  }}
+                  disabled={isVisionLoading || !selectedPhoto}
+                  className={`mt-4 px-5 py-2 border border-black rounded-sm transition ${
+                    isVisionLoading || !selectedPhoto
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-[#b7fff9ff] text-black hover:bg-[#a0ede7]"
+                  }`}
                 >
-                  Apply
+                  {isVisionLoading ? "Analyzing image..." : "Apply"}
                 </button>
               </div>
             </div>
@@ -299,6 +350,16 @@ export default function EditorPage() {
             {isDownloading ? 'Saving...' : 'Save the NewMe'}
           </button>
         </div>
+
+        {/* Vision results panel */}
+        <VisionResults
+          isOpen={showVisionPanel}
+          onClose={() => setShowVisionPanel(false)}
+          isLoading={isVisionLoading}
+          error={visionError}
+          labels={visionData?.labels}
+          raw={visionData?.visionResponse}
+        />
       </div>
 
       {/* Google Photos Picker Modal */}

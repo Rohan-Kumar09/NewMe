@@ -20,8 +20,11 @@ export async function GET(request: Request) {
     const cookies = parseCookies(cookieHeader);
     const accessToken = cookies['access_token'];
 
+    // Basic diagnostics
+    console.log('Proxy-image called; cookie header present:', !!cookieHeader, 'access_token present:', !!accessToken);
+
     if (!accessToken) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ error: 'Not authenticated (missing access_token cookie)' }, { status: 401 });
     }
 
     const decodedToken = decodeURIComponent(accessToken);
@@ -35,23 +38,44 @@ export async function GET(request: Request) {
     console.log('Proxying image:', imageUrl);
 
     // Fetch the image with authorization header
-    const imageRes = await fetch(imageUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${decodedToken}`,
-      },
-    });
+    let imageRes: Response;
+    try {
+      imageRes = await fetch(imageUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${decodedToken}`,
+        },
+      });
+    } catch (fetchErr) {
+      console.error('Network/fetch error when proxying image:', fetchErr);
+      return NextResponse.json({ error: 'Network error when fetching image', details: String(fetchErr) }, { status: 502 });
+    }
 
     if (!imageRes.ok) {
-      console.error('Image fetch error:', imageRes.status, imageRes.statusText);
+      // Try to capture a small snippet of the response body for debugging (not the full binary)
+      let bodySnippet = null;
+      try {
+        const txt = await imageRes.text();
+        bodySnippet = txt.slice(0, 1000);
+      } catch (e) {
+        bodySnippet = '<no-text-body-unavailable>';
+      }
+      console.error('Image fetch error:', imageRes.status, imageRes.statusText, 'bodySnippet:', bodySnippet);
       return NextResponse.json(
-        { error: 'Failed to fetch image' },
+        { error: 'Failed to fetch image', status: imageRes.status, statusText: imageRes.statusText, bodySnippet },
         { status: imageRes.status }
       );
     }
 
     // Get the image as a buffer
-    const imageBuffer = await imageRes.arrayBuffer();
+    let imageBuffer: ArrayBuffer;
+    try {
+      imageBuffer = await imageRes.arrayBuffer();
+    } catch (e) {
+      console.error('Error reading image response as arrayBuffer:', e);
+      return NextResponse.json({ error: 'Failed to read image body', details: String(e) }, { status: 500 });
+    }
+
     const contentType = imageRes.headers.get('content-type') || 'image/jpeg';
 
     // Return the image with proper headers
@@ -63,9 +87,9 @@ export async function GET(request: Request) {
       },
     });
   } catch (e) {
-    console.error('Proxy image error:', e);
+    console.error('Proxy image error (catch):', e);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: String(e) },
       { status: 500 }
     );
   }

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import type { VisionValidationResult } from "../utils/visionValidation";
 
 interface VisionResultsProps {
   isOpen: boolean;
@@ -8,9 +9,10 @@ interface VisionResultsProps {
   error: string | null;
   labels: Array<{ description: string; score: number }> | null;
   raw: any | null;
+  validation?: VisionValidationResult | null;
 }
 
-export default function VisionResults({ isOpen, onClose, isLoading, error, labels, raw }: VisionResultsProps) {
+export default function VisionResults({ isOpen, onClose, isLoading, error, labels, raw, validation }: VisionResultsProps) {
   const [showRaw, setShowRaw] = useState(false);
 
   if (!isOpen) return null;
@@ -39,6 +41,60 @@ export default function VisionResults({ isOpen, onClose, isLoading, error, label
 
       {error && (
         <div className="mt-2 text-red-600">Error running Vision: {error}</div>
+      )}
+
+      {/* Validation Status */}
+      {!isLoading && validation && (
+        <div className="mt-3 p-3 bg-gray-50 rounded border">
+          <div className="text-sm font-medium mb-2">Image Validation</div>
+          
+          {/* Face Detection Status */}
+          <div className="flex items-center space-x-2 mb-1">
+            <span className={validation.hasDetectedFace ? "text-green-600" : "text-red-600"}>
+              {validation.hasDetectedFace ? "✓" : "✗"}
+            </span>
+            <span className="text-sm">
+              {validation.hasDetectedFace 
+                ? `Face detected (${validation.faceCount})` 
+                : "No face detected"}
+            </span>
+          </div>
+
+          {/* Safety Check Status */}
+          <div className="flex items-center space-x-2 mb-1">
+            <span className={validation.isSafeContent ? "text-green-600" : "text-red-600"}>
+              {validation.isSafeContent ? "✓" : "✗"}
+            </span>
+            <span className="text-sm">
+              {validation.isSafeContent ? "Content safe" : "Inappropriate content"}
+            </span>
+          </div>
+
+          {/* Overall Status */}
+          <div className="flex items-center space-x-2 mt-2 pt-2 border-t">
+            <span className={validation.isValid ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+              {validation.isValid ? "✓ Ready for processing" : "✗ Cannot process"}
+            </span>
+          </div>
+
+          {/* Error Message */}
+          {validation.errorMessage && (
+            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+              {validation.errorMessage}
+            </div>
+          )}
+
+          {/* Warnings */}
+          {validation.warnings.length > 0 && (
+            <div className="mt-2 space-y-1">
+              {validation.warnings.map((warning, idx) => (
+                <div key={idx} className="text-xs text-yellow-700 bg-yellow-50 p-2 rounded border border-yellow-200">
+                  ⚠️ {warning}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {!isLoading && !error && labels && (

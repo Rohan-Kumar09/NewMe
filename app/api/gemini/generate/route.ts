@@ -106,6 +106,7 @@ export async function POST(request: Request) {
         topK: 64,
         maxOutputTokens: 8192,
         candidateCount: 1,
+        response_modalities: ['IMAGE'],
       },
     };
 

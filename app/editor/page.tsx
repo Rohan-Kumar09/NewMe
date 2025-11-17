@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import GooglePhotosPicker from "../components/GooglePhotosPickerNew";
 import VisionResults from "../components/VisionResults";
 import { downloadUrlAsFile } from "../utils/download";
@@ -231,6 +231,30 @@ export default function EditorPage() {
     }
   }
 
+  // Memoize image display to prevent re-renders on every keystroke
+  const imageDisplay = useMemo(() => {
+    if (!selectedPhoto) {
+      return <span className="text-gray-600 text-sm">Image</span>;
+    }
+    
+    return (
+      <>
+        <img
+          src={selectedPhoto}
+          alt="Selected from Google Photos"
+          className="w-full h-full object-cover"
+          crossOrigin="anonymous"
+        />
+        {isVisionLoading && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-3"></div>
+            <span className="text-white text-sm font-medium">Processing image...</span>
+          </div>
+        )}
+      </>
+    );
+  }, [selectedPhoto, isVisionLoading]);
+
   return (
     <div
       className={"min-h-screen flex flex-row text-black bg-[#8df6ddff] " +
@@ -309,35 +333,7 @@ export default function EditorPage() {
           <div className="w-1/2 flex flex-col items-center justify-start p-6 mt-4">
             {/* Image placeholder */}
             <div className="w-[310px] h-[310px] bg-gray-300 rounded-md mb-4 flex items-center justify-center overflow-hidden relative">
-              {selectedPhoto ? (
-                <>
-                  {console.log('🖼️ [RENDER] Rendering image with URL:', selectedPhoto)}
-                  <img
-                    src={selectedPhoto}
-                    alt="Selected from Google Photos"
-                    className="w-full h-full object-cover"
-                    crossOrigin="anonymous"
-                    onLoad={() => console.log('✅ [IMAGE] Image loaded successfully:', selectedPhoto)}
-                    onError={(e) => {
-                      console.error('❌ [IMAGE] Image failed to load');
-                      console.error('❌ [IMAGE] Image URL was:', selectedPhoto);
-                      console.error('❌ [IMAGE] Error event:', e);
-                    }}
-                  />
-                  {/* Loading overlay during Vision API analysis */}
-                  {isVisionLoading && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-3"></div>
-                      <span className="text-white text-sm font-medium">Processing image...</span>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  {console.log('🖼️ [RENDER] No photo selected, showing placeholder')}
-                  <span className="text-gray-600 text-sm">Image</span>
-                </>
-              )}
+              {imageDisplay}
             </div>
 
             {/* Import from Google button (immediately below the Image window) */}

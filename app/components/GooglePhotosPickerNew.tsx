@@ -55,9 +55,10 @@ export default function GooglePhotosPicker({
       const left = (window.screen.width - width) / 2;
       const top = (window.screen.height - height) / 2;
       
-      // Don't use /autoclose - we'll close it ourselves
+      // Add /autoclose to make the picker window close automatically when user clicks "Done"
+      const autoCloseUri = `${pickerUri}/autoclose`;
       const popup = window.open(
-        pickerUri,
+        autoCloseUri,
         'Google Photos Picker',
         `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
       );

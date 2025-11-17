@@ -116,24 +116,10 @@ export default function GooglePhotosPicker({
             
             // PickedMediaItem has structure: { mediaFile: { baseUrl, mimeType, width, height } }
             const baseUrl = firstItem.mediaFile?.baseUrl || firstItem.baseUrl;
-            const origWidth = firstItem.mediaFile?.width || firstItem.width;
-            const origHeight = firstItem.mediaFile?.height || firstItem.height;
             console.log('📸 [MEDIA] Extracted baseUrl:', baseUrl);
-            console.log('📸 [MEDIA] Original dimensions:', origWidth, origHeight);
 
-            function getResizedDimensions(width: number, height: number, maxSide = 1000) {
-              let w = width;
-              let h = height;
-              while (Math.max(w, h) > maxSide) {
-                w = Math.floor(w / 2);
-                h = Math.floor(h / 2);
-              }
-              return { w, h };
-            }
-
-            if (baseUrl && origWidth && origHeight) {
-              const { w, h } = getResizedDimensions(origWidth, origHeight, 1000);
-              const googlePhotoUrl = `${baseUrl}=w${w}-h${h}`;
+            if (baseUrl) {
+              const googlePhotoUrl = `${baseUrl}=w1000-h1000`;
               const photoUrl = `/api/photos/proxy-image?url=${encodeURIComponent(googlePhotoUrl)}`;
               console.log('📸 [MEDIA] Google Photos URL:', googlePhotoUrl);
               console.log('📸 [MEDIA] Proxied URL:', photoUrl);
@@ -141,7 +127,7 @@ export default function GooglePhotosPicker({
               onSelectPhoto(photoUrl, firstItem);
               console.log('✅ [MEDIA] Callback completed');
             } else {
-              console.error('❌ [MEDIA] No baseUrl or dimensions found in media item');
+              console.error('❌ [MEDIA] No baseUrl found in media item');
             }
           } else {
             console.warn('⚠️ [MEDIA] No media items in poll response, fetching separately...');
@@ -161,30 +147,18 @@ export default function GooglePhotosPicker({
                   
                   // PickedMediaItem has structure: { mediaFile: { baseUrl, mimeType, width, height } }
                   const baseUrl = firstItem.mediaFile?.baseUrl || firstItem.baseUrl;
-                  const origWidth = firstItem.mediaFile?.width || firstItem.width;
-                  const origHeight = firstItem.mediaFile?.height || firstItem.height;
                   console.log('📸 [MEDIA] Extracted baseUrl:', baseUrl);
-                  console.log('📸 [MEDIA] Original dimensions:', origWidth, origHeight);
 
-                  function getResizedDimensions(width: number, height: number, maxSide = 1000) {
-                    let w = width;
-                    let h = height;
-                    while (Math.max(w, h) > maxSide) {
-                      w = Math.floor(w / 2);
-                      h = Math.floor(h / 2);
-                    }
-                    return { w, h };
-                  }
-
-                  if (baseUrl && origWidth && origHeight) {
-                    const { w, h } = getResizedDimensions(origWidth, origHeight, 1000);
-                    const googlePhotoUrl = `${baseUrl}=w${w}-h${h}`;
+                  if (baseUrl) {
+                    const googlePhotoUrl = `${baseUrl}=w512-h512`;
                     const photoUrl = `/api/photos/proxy-image?url=${encodeURIComponent(googlePhotoUrl)}`;
                     console.log('📸 [MEDIA] Google Photos URL:', googlePhotoUrl);
                     console.log('📸 [MEDIA] Proxied URL:', photoUrl);
                     console.log('✅ [MEDIA] Calling onSelectPhoto callback...');
                     onSelectPhoto(photoUrl, firstItem);
                     console.log('✅ [MEDIA] Callback completed');
+                  } else {
+                    console.error('❌ [MEDIA] No baseUrl found in media item');
                   }
                 }
               } else {

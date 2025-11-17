@@ -283,7 +283,7 @@ export default function GooglePhotosPicker({
         {!loading && !error && (
           <div className="text-center">
             <div className="text-xl text-gray-800 mb-4">Select your photos in the popup window</div>
-            <div className="text-sm text-gray-600 mb-4">This window will close automatically when you're done</div>
+            <div className="text-sm text-gray-600 mb-4">Close this window when you're done</div>
             <button
               onClick={onClose}
               className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300"

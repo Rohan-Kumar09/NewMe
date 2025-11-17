@@ -30,7 +30,6 @@ export default function EditorPage() {
   const [visionValidation, setVisionValidation] = useState<VisionValidationResult | null>(null);
 
   // Gemini state
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [geminiError, setGeminiError] = useState<string | null>(null);
 
@@ -184,7 +183,6 @@ export default function EditorPage() {
 
     setGeminiError(null);
     setIsGenerating(true);
-    setGeneratedImage(null);
 
     try {
       console.log('🎨 [GEMINI] Starting generation...');
@@ -218,7 +216,7 @@ export default function EditorPage() {
       console.log('✅ [GEMINI] Response:', data);
 
       if (data.imageUrl) {
-        setGeneratedImage(data.imageUrl);
+        setSelectedPhoto(data.imageUrl);
         console.log('🖼️ [GEMINI] Generated image set');
       } else {
         setGeminiError(data.message || 'No image was generated');
@@ -425,7 +423,6 @@ export default function EditorPage() {
             className="px-4 py-2 space-x-3 bg-transparent text-black rounded-full hover:bg-red-600 flex items-center border border-black text-[18px]"
             onClick={() => {
               setSelectedPhoto(null);
-              setGeneratedImage(null);
               setGeminiError(null);
             }}
           >
@@ -453,52 +450,8 @@ export default function EditorPage() {
           </button>
         </div>
 
-        {/* Generated Image and Vision Results Container */}
+        {/* Vision Results Container */}
         <div className="mt-8 flex space-x-4 items-start">
-          {/* Generated Image Display */}
-          {(generatedImage || isGenerating || geminiError) && (
-            <div className="w-[310px] bg-white rounded-md shadow-md p-4">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="text-lg font-medium">Generated Result</h3>
-                <button
-                  onClick={() => {
-                    setGeneratedImage(null);
-                    setGeminiError(null);
-                  }}
-                  className="px-2 py-1 text-sm border rounded bg-red-100"
-                >
-                  Clear
-                </button>
-              </div>
-
-              {isGenerating && (
-                <div className="flex flex-col items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-3"></div>
-                  <span className="text-sm text-gray-600">Generating your new look...</span>
-                </div>
-              )}
-
-              {geminiError && !isGenerating && (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
-                  {geminiError}
-                </div>
-              )}
-
-              {generatedImage && !isGenerating && (
-                <div className="space-y-3">
-                  <img
-                    src={generatedImage}
-                    alt="Generated hairstyle"
-                    className="w-full rounded border border-gray-200"
-                  />
-                  <div className="text-xs text-gray-500 text-center">
-                    Your new look with {color || 'custom'} {style || 'hairstyle'}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Vision results panel */}
           <VisionResults
             isOpen={showVisionPanel}

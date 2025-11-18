@@ -4,26 +4,38 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:server": "tsx watch server/index.ts",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
     "build": "next build",
+    "build:server": "tsc --project server/tsconfig.json",
     "start": "next start",
+    "start:server": "node dist/server/index.js",
     "lint": "eslint"
   },
   "dependencies": {
     "@fontsource/comfortaa": "^5.2.8",
     "@fontsource/lexend": "^5.2.11",
     "@google-cloud/vision": "^5.3.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "firebase-admin": "^13.0.2",
     "next": "16.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",
     "tailwindcss": "^4",
+    "tsx": "^4.19.2",
     "typescript": "^5"
   }
 }

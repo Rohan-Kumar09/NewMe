@@ -255,7 +255,6 @@ export default function EditorPage() {
 
   return (
     <div className="min-h-screen flex flex-row bg-gradient-to-br from-gray-50 via-white to-primary/5">
-      {/* LEFT SIDEBAR */}
       <div className="w-64 bg-white border-r border-gray-200 shadow-sm flex flex-col h-screen overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-900 mb-1">✨ Style Inspiration</h2>

@@ -47,8 +47,8 @@ export default function AuthButton() {
 
   if (loading) {
     return (
-      <span className="ml-4 inline-flex items-center px-4 py-2 text-black text-2xl font-medium font-['Comfortaa',sans-serif]">
-        ...
+      <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500">
+        Loading...
       </span>
     );
   }
@@ -85,20 +85,25 @@ export default function AuthButton() {
         ) : (
           <button
             onClick={() => setMenuOpen((s) => !s)}
-            className="ml-4 inline-flex items-center px-3 py-1 text-black text-xl font-medium hover:underline hover:bg-gray-100 transition-colors rounded"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors duration-200 rounded-md hover:bg-gray-50"
           >
             Account
           </button>
         )}
 
         {menuOpen ? (
-          <div className="absolute right-0 top-full mt-3 w-40 bg-white border rounded shadow-md z-50">
-            <div className="px-3 py-2 text-sm text-gray-700">{user?.name ?? user?.email}</div>
+          <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden animate-slide-down">
+            <div className="px-4 py-3 border-b border-gray-200">
+              <p className="text-sm font-medium text-gray-900 truncate">{user?.name ?? 'User'}</p>
+              {user?.email && (
+                <p className="text-xs text-gray-500 truncate mt-1">{user.email}</p>
+              )}
+            </div>
             <button
               onClick={handleLogout}
-              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-red-600"
+              className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
             >
-              Logout
+              Sign Out
             </button>
           </div>
         ) : null}
@@ -109,9 +114,9 @@ export default function AuthButton() {
   return (
     <Link
       href="/api/auth/google"
-      className="ml-4 inline-flex items-center px-4 py-2 text-black text-2xl font-medium hover:underline font-['Comfortaa',sans-serif]"
+      className="inline-flex items-center px-5 py-2.5 text-sm font-semibold text-white bg-primary hover:bg-primary-dark rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
     >
-      Login
+      Sign In
     </Link>
   );
 }

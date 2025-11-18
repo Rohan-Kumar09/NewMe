@@ -32,7 +32,7 @@ export default function AuthAwareEditor() {
   return (
     <Link
       href="/editor"
-      className="inline-flex items-center px-3 py-2 text-black text-2xl font-medium hover:underline font-['Comfortaa',sans-serif]"
+      className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors duration-200 rounded-md hover:bg-gray-50"
     >
       Editor
     </Link>

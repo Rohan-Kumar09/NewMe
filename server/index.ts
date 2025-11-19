@@ -34,8 +34,17 @@ try {
       projectId: process.env.FIREBASE_PROJECT_ID,
     });
   } else {
-    console.warn('⚠️  Firebase credentials not found. Using default credentials.');
-    initializeApp();
+    const connectionString = process.env.FIREBASE_CONNECTION_STRING;
+    if (connectionString) {
+      const projectId = connectionString.split(':')[0];
+      console.log(`Using project ID from connection string: ${projectId}`);
+      initializeApp({
+        projectId: projectId,
+      });
+    } else {
+      console.warn('Firebase credentials not found. Using default credentials.');
+      initializeApp();
+    }
   }
   console.log('Firebase Admin initialized successfully');
 } catch (error) {

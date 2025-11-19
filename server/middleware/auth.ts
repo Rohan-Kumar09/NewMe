@@ -1,12 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
 
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   user?: {
     email: string;
-    name?: string;
-    picture?: string;
+    name?: string | null;
+    picture?: string | null;
     userId: string;
   };
+}
+
+interface TokenInfo {
+  email?: string;
+  name?: string;
+  picture?: string;
+  sub?: string;
 }
 
 /**
@@ -43,14 +50,14 @@ export default async function authMiddleware(
       return res.status(401).json({ error: 'Invalid token' });
     }
 
-    const tokenInfo = await verifyRes.json();
+    const tokenInfo = await verifyRes.json() as TokenInfo;
 
     // Attach user info to request
     req.user = {
-      email: tokenInfo.email,
+      email: tokenInfo.email || '',
       name: tokenInfo.name || null,
       picture: tokenInfo.picture || null,
-      userId: tokenInfo.sub || tokenInfo.email, // Use Google user ID or email as fallback
+      userId: tokenInfo.sub || tokenInfo.email || '', // Use Google user ID or email as fallback
     };
 
     next();

@@ -1,9 +1,13 @@
 import express, { Request, Response } from 'express';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { AuthenticatedRequest } from '../middleware/auth';
 
 const router = express.Router();
-const db = getFirestore();
+
+// Helper function to get Firestore instance
+function getDb(): Firestore {
+  return getFirestore();
+}
 
 interface Transformation {
   userId: string;
@@ -41,6 +45,7 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
       prompt: prompt || null,
     };
 
+    const db = getDb();
     const now = new Date();
     const docRef = await db.collection('transformations').add({
       ...transformation,
@@ -71,6 +76,7 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
  */
 router.get('/', async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const db = getDb();
     const user = req.user!;
     const limit = parseInt(req.query.limit as string) || 50;
     const lastDocId = req.query.lastDocId as string | undefined;
@@ -126,6 +132,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
  */
 router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const db = getDb();
     const { id } = req.params;
     const user = req.user!;
 
@@ -163,6 +170,7 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
  */
 router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const db = getDb();
     const { id } = req.params;
     const user = req.user!;
 
@@ -199,6 +207,7 @@ router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
  */
 router.get('/stats/summary', async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const db = getDb();
     const user = req.user!;
 
     const snapshot = await db

@@ -65,12 +65,8 @@ export async function POST(request: Request) {
           {
             image: { content: imageBuffer },
             features: [
-              { type: 'LABEL_DETECTION', maxResults: 20 },
-              { type: 'TEXT_DETECTION', maxResults: 20 },
               { type: 'FACE_DETECTION', maxResults: 10 },
-              { type: 'OBJECT_LOCALIZATION', maxResults: 20 },
-              { type: 'IMAGE_PROPERTIES', maxResults: 5 },
-              { type: 'SAFE_SEARCH_DETECTION', maxResults: 5 },
+              { type: 'SAFE_SEARCH_DETECTION' },
             ],
           },
         ],
@@ -97,12 +93,8 @@ export async function POST(request: Request) {
             {
               image: { content: base64 },
               features: [
-                { type: 'LABEL_DETECTION', maxResults: 20 },
-                { type: 'TEXT_DETECTION', maxResults: 20 },
                 { type: 'FACE_DETECTION', maxResults: 10 },
-                { type: 'OBJECT_LOCALIZATION', maxResults: 20 },
-                { type: 'IMAGE_PROPERTIES', maxResults: 5 },
-                { type: 'SAFE_SEARCH_DETECTION', maxResults: 5 },
+                { type: 'SAFE_SEARCH_DETECTION' },
               ],
             },
           ],

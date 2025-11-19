@@ -82,46 +82,7 @@ export function validateVisionData(visionResponse: any): VisionValidationResult 
     }
   }
 
-  // 3. Image Quality Checks (optional warnings)
-  const imageProps = visionResponse?.imagePropertiesAnnotation;
-  if (imageProps?.dominantColors?.colors) {
-    const topColor = imageProps.dominantColors.colors[0];
-    // If image is very dark (low RGB values and high coverage)
-    if (topColor.color && topColor.pixelFraction > 0.5) {
-      const brightness = (topColor.color.red + topColor.color.green + topColor.color.blue) / 3;
-      if (brightness < 30) {
-        result.warnings.push('Image appears very dark. Better lighting may improve results.');
-      }
-    }
-  }
-
   return result;
-}
-
-/**
- * Extract current hair features from Vision API labels
- * @param visionResponse - The full Vision API response object
- * @returns Array of detected hair-related features
- */
-export function extractHairFeatures(visionResponse: any): string[] {
-  const labels = visionResponse?.labelAnnotations || [];
-  
-  const hairKeywords = [
-    'hair', 'hairstyle', 'haircut', 'bangs', 'ponytail', 
-    'braid', 'beard', 'mustache', 'long hair', 'short hair',
-    'curly', 'straight', 'wavy'
-  ];
-
-  const hairLabels = labels
-    .filter((l: any) => {
-      const desc = l.description.toLowerCase();
-      return hairKeywords.some(keyword => desc.includes(keyword));
-    })
-    .filter((l: any) => l.score > 0.7) // Only confident detections
-    .map((l: any) => l.description)
-    .slice(0, 5); // Top 5 features
-
-  return hairLabels;
 }
 
 /**

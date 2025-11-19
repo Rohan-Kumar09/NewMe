@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import GooglePhotosPicker from "../components/GooglePhotosPickerNew";
 import VisionResults from "../components/VisionResults";
 import { downloadUrlAsFile } from "../utils/download";
-import { validateVisionData, extractHairFeatures, assessImageQuality } from "../utils/visionValidation";
+import { validateVisionData } from "../utils/visionValidation";
 import type { VisionValidationResult } from "../utils/visionValidation";
 import { buildHairModificationPrompt, validateUserInput } from "../utils/geminiPrompt";
 
@@ -124,18 +124,6 @@ export default function EditorPage() {
         console.error('❌ [VALIDATION] Failed:', validation.errorMessage);
       } else if (validation.warnings.length > 0) {
         console.warn('⚠️ [VALIDATION] Warnings:', validation.warnings);
-      }
-      
-      // Extract hair features for future use
-      const hairFeatures = extractHairFeatures(data.visionResponse);
-      if (hairFeatures.length > 0) {
-        console.log('💇 [VISION] Detected hair features:', hairFeatures);
-      }
-      
-      // Assess image quality
-      const quality = assessImageQuality(data.visionResponse);
-      if (!quality.isGoodQuality) {
-        console.warn('📸 [QUALITY] Suggestions:', quality.suggestions);
       }
       
       setShowVisionPanel(true); // Auto-open panel on successful analysis

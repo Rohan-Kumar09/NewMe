@@ -242,214 +242,249 @@ export default function EditorPage() {
   }, [selectedPhoto, isVisionLoading]);
 
   return (
-    <div
-      className={"min-h-screen flex flex-row text-black bg-[#8df6ddff] " +
-        "font-['Lexend',sans-serif] " +
-        "bg-[radial-gradient(#fef5fe_2px,transparent_2px),radial-gradient(#fef5fe_2px,transparent_2px)] " +
-        "bg-size-[80px_80px] bg-position-[0_0,40px_40px] bg-blend-overlay"}
-    >
+    <div className="min-h-screen flex flex-row bg-gradient-to-br from-gray-50 via-white to-primary/5">
       {/* LEFT SIDEBAR */}
-      <div
-        className="w-[220px] bg-[#152f40ff] shadow-md border-r border-white flex flex-col items-center py-5 h-screen overflow-y-auto font-['Comfortaa',sans-serif]"
-      >
-        <h1 className="text-white text-lg font-medium text-[20px] mb-5">✨ Style Inspiration</h1>
+      <div className="w-64 bg-white border-r border-gray-200 shadow-sm flex flex-col h-screen overflow-y-auto">
+        <div className="p-6 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-gray-900 mb-1">✨ Style Inspiration</h2>
+          <p className="text-sm text-gray-600">Get ideas for your transformation</p>
+        </div>
 
-        <div className="flex flex-col space-y-0 text-white font-medium text-[18px]">
+        <div className="flex-1 p-4 space-y-4">
           {/* Popular Hair Colors */}
-          <button 
-            onClick={() => setShowColors(!showColors)}
-            className="border border-white px-4 py-2"
-          >
-            Popular Hair Colors
-          </button>
+          <div>
+            <button 
+              onClick={() => setShowColors(!showColors)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-left"
+            >
+              <span className="font-semibold text-gray-900">Popular Hair Colors</span>
+              <svg
+                className={`w-5 h-5 text-gray-500 transition-transform ${showColors ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
 
-          {/* Conditional list */}
             {showColors && (
-              <ul className="list-disc text-white text-sm mt-5 mb-5 ml-10 space-y-1 text-left text-[18px]">
-                {/* First group */}
-                {hairColors.slice(0, 5).map((color, index) => (
-                  <li key={index}>{color}</li>
-                ))}
-
-                {/* Gap before second group */}
-                <div className="mt-6"></div>
-
-                {/* Second group */}
-                {hairColors.slice(5).map((color, index) => (
-                  <li key={index + 5}>{color}</li>
-                ))}
-              </ul>
+              <div className="mt-2 space-y-1 animate-slide-down">
+                <div className="grid grid-cols-2 gap-2 p-2">
+                  {hairColors.map((color, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setColor(color)}
+                      className="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-primary hover:text-white hover:border-primary transition-colors text-left"
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
+          </div>
 
           {/* Trending Hairstyles */}
-          <button
-            onClick={() => setShowHairstyles(!showHairstyles)}
-            className="border border-white px-4 py-2"
-          >
-            Trending Hairstyles
-          </button>
+          <div>
+            <button
+              onClick={() => setShowHairstyles(!showHairstyles)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-left"
+            >
+              <span className="font-semibold text-gray-900">Trending Hairstyles</span>
+              <svg
+                className={`w-5 h-5 text-gray-500 transition-transform ${showHairstyles ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
 
-          {/* Conditional list */}
             {showHairstyles && (
-              <ul className="list-disc text-white text-sm mt-5 mb-5 ml-10 space-y-1 text-left text-[18px]">
-                {/* First group */}
-                {trendingHairstyles.slice(0, 9).map((style, index) => (
-                  <li key={index}>{style}</li>
-                ))}
-
-                {/* Gap before second group */}
-                <div className="mt-6"></div>
-
-                {/* Second group */}
-                {trendingHairstyles.slice(9).map((style, index) => (
-                  <li key={index + 9}>{style}</li>
-                ))}
-              </ul>
+              <div className="mt-2 space-y-1 animate-slide-down">
+                <div className="grid grid-cols-2 gap-2 p-2">
+                  {trendingHairstyles.map((style, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setStyle(style)}
+                      className="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-primary hover:text-white hover:border-primary transition-colors text-left"
+                    >
+                      {style}
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
+          </div>
         </div>
       </div>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex flex-col items-center flex-1 pt-[15px]">
-        <p className="text-[40px]">Experiment and Get Creative</p>
+      <div className="flex-1 flex flex-col overflow-y-auto">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200 px-8 py-6">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+            Experiment and Get Creative
+          </h1>
+          <p className="text-lg text-gray-600">
+            Transform your look with AI-powered style changes
+          </p>
+        </div>
 
-        {/* White Rectangle Container */}
-        <div className="bg-white rounded-sm shadow-lg w-[910px] h-[470px] flex overflow-hidden border border-gray-200 mt-10">
-          {/* Left Side */}
-          <div className="w-1/2 flex flex-col items-center justify-start p-6 mt-4">
-            {/* Image placeholder */}
-            <div className="w-[310px] h-[310px] bg-gray-300 rounded-md mb-4 flex items-center justify-center overflow-hidden relative">
-              {imageDisplay}
-            </div>
+        {/* Main Content */}
+        <div className="flex-1 p-8">
+          <div className="max-w-6xl mx-auto">
+            {/* Image and Form Container */}
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="grid md:grid-cols-2 p-8 gap-8 relative">
+                {/* Left Side - Image */}
+                <div className="flex flex-col items-center md:border-r md:border-gray-200 md:pr-8">
+                  <div className="w-full max-w-md aspect-square bg-gray-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden relative border border-gray-200">
+                    {imageDisplay}
+                  </div>
 
-            {/* Import from Google button (immediately below the Image window) */}
-            <button
-              onClick={() => setShowPhotoPicker(true)}
-              className="mt-2 px-4 py-2 bg-[#b7fff9ff] text-black border border-black rounded-sm w-[285px] text-lg"
-            >
-              Import Photos
-            </button>
+                  <button
+                    onClick={() => setShowPhotoPicker(true)}
+                    className="w-full max-w-md px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Import Photos
+                  </button>
 
-            {/* Description */}
-            <p className="w-[285px] text-sm text-black text-center">
-              This represents your current look. Customize the options on the right to see changes.
-            </p>
-          </div>
-
-         {/* Divider */}
-          <div className="mt-10 mb-10 w-px bg-black"></div>
-
-        {/* Right Side */}
-          <div className="w-1/2 flex flex-col justify-center items-center p-6 space-y-4">
-            <h2 className="text-[25px] font-medium text-black text-center">
-              What would you like to customize?
-            </h2>
-
-            <div className="w-[90%] space-y-4">
-              {/* Hair color input with image */}
-              <label className="flex flex-col items-start">
-                <span className="mt-3 text-[16px] text-[#434343] ml-[89px] mb-1">Hair color</span>
-                <div className="flex items-center justify-center space-x-7">
-                  <img
-                    src="/images/color_wheel.png"
-                    alt="Color Wheel"
-                    className="w-12 h-12 object-contain"
-                  />
-                  <input
-                    value={color}
-                    onChange={(e) => setColor(e.target.value)}
-                    placeholder="e.g. Pink"
-                    className="w-80 flex-1 px-3 py-2 text-[18px] bg-[#b7fff9ff] border border-black rounded focus:outline-none"
-                  />
+                  <p className="mt-4 text-sm text-gray-600 text-center max-w-md">
+                    This represents your current look. Customize the options on the right to see changes.
+                  </p>
                 </div>
-              </label>
 
+                {/* Right Side - Form */}
+                <div className="flex flex-col justify-center md:pl-8">
+                  <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                    What would you like to customize?
+                  </h2>
 
-              {/* Hairstyle input with image */}
-              <label className="flex flex-col items-start">
-                <span className="mt-3 text-[16px] text-[#434343] ml-[89px] mb-1">Hairstyle</span>
-                <div className="flex items-center justify-center space-x-7">
-                  <img
-                    src="/images/comb_and_scissors.png"
-                    alt="Comb and Scissors"
-                    className="w-12 h-12 object-contain"
-                  />
-                  <input
-                    value={style}
-                    onChange={(e) => setStyle(e.target.value)}
-                    placeholder="e.g. Mohawk, No beard"
-                    className="w-80 flex-1 px-3 py-2 text-[18px] bg-[#b7fff9ff] border border-black rounded focus:outline-none"
-                  />
+                  <div className="space-y-6">
+                    {/* Hair color input */}
+                    <label className="block">
+                      <div className="flex items-center gap-3 mb-2">
+                        <img
+                          src="/images/color_wheel.png"
+                          alt="Color Wheel"
+                          className="w-6 h-6 object-contain"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Hair Color</span>
+                      </div>
+                      <input
+                        value={color}
+                        onChange={(e) => setColor(e.target.value)}
+                        placeholder="e.g. Pink, Blonde, Blue"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
+                      />
+                    </label>
+
+                    {/* Hairstyle input */}
+                    <label className="block">
+                      <div className="flex items-center gap-3 mb-2">
+                        <img
+                          src="/images/comb_and_scissors.png"
+                          alt="Comb and Scissors"
+                          className="w-6 h-6 object-contain"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Hairstyle</span>
+                      </div>
+                      <input
+                        value={style}
+                        onChange={(e) => setStyle(e.target.value)}
+                        placeholder="e.g. Mohawk, No beard, Bob Cut"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
+                      />
+                    </label>
+
+                    {/* Apply Button */}
+                    <button
+                      onClick={() => {
+                        generateWithGemini();
+                        setIsApplied(true);
+                      }}
+                      disabled={isVisionLoading || !selectedPhoto || (visionValidation?.isValid === false) || isGenerating}
+                      className={`w-full px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                        isVisionLoading || !selectedPhoto || (visionValidation?.isValid === false) || isGenerating
+                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          : "bg-primary hover:bg-primary-dark text-white shadow-md hover:shadow-lg transform hover:scale-105"
+                      }`}
+                      title={visionValidation?.isValid === false ? visionValidation.errorMessage : ''}
+                    >
+                      {isVisionLoading ? "Analyzing image..." : isGenerating ? "Generating..." : "Apply Transformation"}
+                    </button>
+                  </div>
                 </div>
-              </label>
-
-              <div className="flex justify-center mt-4">
-                <button
-                  onClick={() => {
-                    generateWithGemini();
-                    setIsApplied(true);
-                  }}
-                  disabled={isVisionLoading || !selectedPhoto || (visionValidation?.isValid === false) || isGenerating}
-                  className={`mt-4 px-5 py-2 border border-black rounded-sm transition ${
-                    isVisionLoading || !selectedPhoto || (visionValidation?.isValid === false) || isGenerating
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-[#b7fff9ff] text-black hover:bg-[#a0ede7]"
-                  }`}
-                  title={visionValidation?.isValid === false ? visionValidation.errorMessage : ''}
-                >
-                  {isVisionLoading ? "Analyzing image..." : isGenerating ? "Generating..." : "Apply"}
-                </button>
               </div>
             </div>
+
+            {/* Action Buttons */}
+            <div className="mt-8 flex items-center justify-center gap-4">
+              <button 
+                className="px-6 py-3 bg-white border border-red-300 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition-colors flex items-center gap-2"
+                onClick={() => {
+                  setSelectedPhoto(null);
+                  setGeminiError(null);
+                  setIsApplied(false);
+                }}
+              >
+                <img
+                  src="/images/trashcan.png"
+                  alt="Trashcan"
+                  className="w-5 h-5 object-contain"
+                />
+                <span>Clear</span>
+              </button>
+
+              <button
+                disabled={!isApplied || isDownloading}
+                onClick={downloadSelectedPhoto}
+                className={`px-6 py-3 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                  isApplied
+                    ? isDownloading
+                      ? "bg-gray-200 text-gray-700 cursor-wait"
+                      : "bg-secondary hover:bg-secondary-dark text-white shadow-md hover:shadow-lg"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                {isDownloading ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>Save the NewMe</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Vision Results Container */}
+            <div className="mt-8">
+              <VisionResults
+                isOpen={showVisionPanel}
+                onClose={() => setShowVisionPanel(false)}
+                isLoading={isVisionLoading}
+                error={visionError}
+                labels={visionData?.labels}
+                raw={visionData?.visionResponse}
+                validation={visionValidation}
+              />
+            </div>
           </div>
-        </div>
-
-        {/* Buttons BELOW the white rectangle */}
-        <div className="mt-12 flex space-x-15">
-          {/* Delete button */}
-          <button 
-            className="px-4 py-2 space-x-3 bg-transparent text-black rounded-full hover:bg-red-600 flex items-center border border-black text-[18px]"
-            onClick={() => {
-              setSelectedPhoto(null);
-              setGeminiError(null);
-            }}
-          >
-            <img
-              src="/images/trashcan.png"
-              alt="Trashcan"
-              className="w-6 h-6 object-contain"
-            />
-            <span>Delete</span>
-          </button>
-
-          {/* Save the NewMe button */}
-          <button
-            disabled={!isApplied || isDownloading}
-            onClick={downloadSelectedPhoto}
-            className={`px-4 py-2 rounded-full border border-black text-[18px] flex items-center justify-center transition ${
-              isApplied
-                ? isDownloading
-                  ? "bg-gray-200 text-gray-700 cursor-wait"
-                  : "bg-transparent text-black"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
-          >
-            {isDownloading ? 'Saving...' : 'Save the NewMe'}
-          </button>
-        </div>
-
-        {/* Vision Results Container */}
-        <div className="mt-8 flex space-x-4 items-start">
-          {/* Vision results panel */}
-          <VisionResults
-            isOpen={showVisionPanel}
-            onClose={() => setShowVisionPanel(false)}
-            isLoading={isVisionLoading}
-            error={visionError}
-            labels={visionData?.labels}
-            raw={visionData?.visionResponse}
-            validation={visionValidation}
-          />
         </div>
       </div>
 

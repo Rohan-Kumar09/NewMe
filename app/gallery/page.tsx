@@ -1,13 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import "@fontsource/lexend";
+import { useState, useEffect, useRef } from "react";
 
 export default function GalleryPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const [activeTab, setActiveTab] = useState<'original' | 'styled'>('original');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+
+    if (dropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   // Example placeholders for Original and Styled photos
   const originalPhotos = Array.from({ length: 72 }, (_, i) => `Original ${i + 1}`);
@@ -16,166 +31,183 @@ export default function GalleryPage() {
   const photosPerPage = 24;
   const totalPages = Math.ceil(originalPhotos.length / photosPerPage);
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
-  // Calculate which photos to display for current page
-  const startIndex = (currentPage - 1) * photosPerPage;
-  const endIndex = startIndex + photosPerPage;
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    setTimeout(() => scrollToTop(), 100);
+  };
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center pt-15 pb-20 text-black bg-[#8df6ddff]"
-      style={{ fontFamily: "'Lexend', sans-serif",
-        backgroundColor: "#8df6ddff", // base color stays
-        backgroundImage:
-          "radial-gradient(#fef5fe 2px, transparent 2px), radial-gradient(#fef5fe 2px, transparent 2px)", // white dots
-        backgroundSize: "80px 80px",
-        backgroundPosition: "0 0, 40px 40px",
-        backgroundBlendMode: "overlay", // makes sure base color shows through
-      }}
-    >
-      <p className="text-[30px]">Your Style Adventure Awaits</p>
-      <p className="text-[18px] mt-5 text-black text-center">
-        Select a Photo and Get Started.
-      </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary/5">
+      {/* Header Section */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+            Your Style Adventure Awaits
+          </h1>
+          <p className="text-lg text-gray-600">
+            Browse your original and styled photos
+          </p>
+        </div>
+      </div>
 
-      {/* Buttons side by side */}
-      <div className="mt-4 flex flex-row justify-center items-center gap-100 flex-nowrap">
-        {/* Original Photos Button */}
-        <div
-          className="mt-4 flex items-center justify-center gap-6 bg-[#152f40ff] text-white rounded-2xl px-6 py-4 shadow-md cursor-pointer hover:shadow-lg transition-all duration-200 border border-white min-w-[250px]"
-        >
-          <img
+      {/* Tab Buttons */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div className="flex flex-row justify-center items-center gap-4 mb-6">
+          <button
+            onClick={() => setActiveTab('original')}
+            className={`flex items-center justify-center gap-3 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === 'original'
+                ? 'bg-primary text-white shadow-lg'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            <img
               src="/images/original_photos.png"
               alt="Original Photos"
-              className="w-12 h-12 rounded-md"
+              className="w-6 h-6 rounded-md"
             />
-          <span className="text-[20px] whitespace-nowrap">Original Photos</span>
-        </div>
+            <span>Original Photos</span>
+          </button>
 
-        {/* Styled Photos Button */}
-        <div
-          className="mt-4 flex items-center justify-center gap-6 bg-[#152f40ff] text-white rounded-2xl px-8 py-4 shadow-md cursor-pointer hover:shadow-lg transition-all duration-200 border border-white min-w-[230px]"
-        >
-          <img
+          <button
+            onClick={() => setActiveTab('styled')}
+            className={`flex items-center justify-center gap-3 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === 'styled'
+                ? 'bg-primary text-white shadow-lg'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            <img
               src="/images/styled_photos.png"
               alt="Styled Photos"
-              className="w-12 h-12 rounded-md"
+              className="w-6 h-6 rounded-md"
             />
-          <span className="text-[20px] whitespace-nowrap">Styled Photos</span>
+            <span>Styled Photos</span>
+          </button>
         </div>
-      </div>
 
-      {/* Sort with dropdown */}
-      <div className="w-full max-w-7xl px-1 relative mt-3">
-        <button
-          onClick={() => setDropdownOpen(!dropdownOpen)}
-          className="flex items-center gap-1 text-lg cursor-pointer px-4 py-2 bg-[#00000000] rounded shadow hover:bg-[#b7fff9ff]"
-        >
-          <span>Sort</span>
-          <span className="ml-1">↑↓</span>
-        </button>
-
-        {dropdownOpen && (
-          <div className="absolute mt-2 bg-[#b7fff9ff] border border-[#a9ede7] shadow-md w-40">
-            <div
-              className="px-4 py-2 hover:bg-white cursor-pointer text-[15px] border-b border-[#a9ede7]"
-              onClick={() => {
-                console.log("Newest First clicked");
-                setDropdownOpen(false);
-              }}
+        {/* Sort Dropdown */}
+        <div className="flex justify-end mb-6 relative" ref={dropdownRef}>
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <span>Sort</span>
+            <svg
+              className={`w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              Newest First
-            </div>
-            <div
-              className="px-4 py-2 hover:bg-white cursor-pointer text-[15px]"
-              onClick={() => {
-                console.log("Oldest First clicked");
-                setDropdownOpen(false);
-              }}
-            >
-              Oldest First
-            </div>
-          </div>
-        )}
-      </div>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
 
-      {/* Two galleries side by side */}
-      <div className="mt-6 flex flex-col sm:flex-row gap-6 w-full max-w-7xl px-4">
-        {/* Original Photos */}
-        <div className="flex-1 pr-6">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 gap-10">
-            {originalPhotos
-              .slice((currentPage - 1) * 24, currentPage * 24)
+          {dropdownOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10 animate-slide-down">
+              <button
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100"
+                onClick={() => {
+                  console.log("Newest First clicked");
+                  setDropdownOpen(false);
+                }}
+              >
+                Newest First
+              </button>
+              <button
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                onClick={() => {
+                  console.log("Oldest First clicked");
+                  setDropdownOpen(false);
+                }}
+              >
+                Oldest First
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Photo Grid */}
+        <div className="mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {(activeTab === 'original' ? originalPhotos : styledPhotos)
+              .slice((currentPage - 1) * photosPerPage, currentPage * photosPerPage)
               .map((photo, i) => (
                 <div
                   key={i}
-                  className="w-full h-50 bg-white rounded-md flex items-center justify-center text-gray-400"
+                  className="aspect-square bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden group cursor-pointer"
                 >
-                  {photo}
+                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm group-hover:bg-gray-50 transition-colors">
+                    {photo}
+                  </div>
                 </div>
               ))}
           </div>
         </div>
 
-        {/* Vertical Line */}
-        <div className="w-px bg-black self-stretch"></div>
+        {/* Pagination */}
+        <div className="flex items-center justify-center gap-4 pb-8">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              currentPage === 1
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-primary"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
 
-        {/* Styled Photos */}
-        <div className="flex-1 pl-6">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 gap-10">
-            {styledPhotos
-              .slice((currentPage - 1) * 24, currentPage * 24)
-              .map((photo, i) => (
-                <div
+          <div className="flex items-center gap-2">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+
+              return (
+                <button
                   key={i}
-                  className="w-full h-50 bg-white rounded-md flex items-center justify-center text-gray-400"
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    currentPage === pageNum
+                      ? "bg-primary text-white shadow-md"
+                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                  }`}
                 >
-                  {photo}
-                </div>
-              ))}
+                  {pageNum}
+                </button>
+              );
+            })}
           </div>
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              currentPage === totalPages
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-primary"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
-      </div>
-
-      {/* Pagination Controls */}
-      <div className="fixed bottom-0 left-0 w-full bg-[#8df6ddff] py-3 flex items-center justify-center gap-1 text-lg font-medium shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
-        {/* Previous Page */}
-        <button
-          onClick={() => {
-            if (currentPage > 1) {
-              setCurrentPage(currentPage - 1);
-              setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 100);
-            }
-          }}
-          disabled={currentPage === 1}
-          className={`px-3 py-1 rounded ${
-            currentPage === 1
-              ? "text-gray-400 cursor-not-allowed"
-              : "hover:bg-[#b7fff9ff]"
-          }`}
-        >
-          &lt;
-        </button>
-
-        <span>Page {currentPage}</span>
-        
-        {/* Next Page */}
-        <button
-          onClick={() => {
-            if (currentPage < totalPages) {
-              setCurrentPage(currentPage + 1);
-              setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 100);
-            }
-          }}
-          disabled={currentPage === totalPages}
-          className={`px-3 py-1 rounded ${
-            currentPage === totalPages
-              ? "text-gray-400 cursor-not-allowed"
-              : "hover:bg-[#b7fff9ff]"
-          }`}
-        >
-          &gt;
-        </button>
       </div>
     </div>
   );

@@ -101,7 +101,7 @@ export async function POST(request: Request) {
         },
       ],
       generationConfig: {
-        temperature: 1.0, // Default for image generation
+        temperature: 1.0,
         topP: 0.95,
         topK: 64,
         maxOutputTokens: 8192,

@@ -7,7 +7,7 @@ export default function GalleryPage() {
   const [activeTab, setActiveTab] = useState<'original' | 'styled'>('original');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -24,7 +24,6 @@ export default function GalleryPage() {
     };
   }, [dropdownOpen]);
 
-  // Example placeholders for Original and Styled photos
   const originalPhotos = Array.from({ length: 72 }, (_, i) => `Original ${i + 1}`);
   const styledPhotos = Array.from({ length: 72 }, (_, i) => `Styled ${i + 1}`);
   const [currentPage, setCurrentPage] = useState(1);

@@ -5,7 +5,7 @@ import { getTransformations, deleteTransformation, type Transformation } from ".
 
 export default function GalleryPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'original' | 'styled'>('original');
+  const [activeTab, setActiveTab] = useState<'original' | 'styled' | 'comparison'>('comparison');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -88,15 +88,29 @@ export default function GalleryPage() {
 
   // Get photos for current tab
   const getPhotosForTab = () => {
-    return sortedTransformations.map((transformation) => ({
-      id: transformation.id,
-      url: activeTab === 'original' 
-        ? getImageUrl(transformation.originalImageUrl)
-        : getImageUrl(transformation.transformedImageUrl),
-      hairColor: transformation.hairColor,
-      hairStyle: transformation.hairStyle,
-      createdAt: transformation.createdAt,
-    })).filter(photo => photo.url); // Filter out photos without URLs
+    if (activeTab === 'comparison') {
+      // For comparison tab, return both URLs
+      return sortedTransformations.map((transformation) => ({
+        id: transformation.id,
+        originalUrl: getImageUrl(transformation.originalImageUrl),
+        transformedUrl: getImageUrl(transformation.transformedImageUrl),
+        url: getImageUrl(transformation.originalImageUrl), // Keep for compatibility
+        hairColor: transformation.hairColor,
+        hairStyle: transformation.hairStyle,
+        createdAt: transformation.createdAt,
+      })).filter(photo => photo.originalUrl && photo.transformedUrl); // Filter out incomplete pairs
+    } else {
+      // For original/styled tabs, return single URL
+      return sortedTransformations.map((transformation) => ({
+        id: transformation.id,
+        url: activeTab === 'original' 
+          ? getImageUrl(transformation.originalImageUrl)
+          : getImageUrl(transformation.transformedImageUrl),
+        hairColor: transformation.hairColor,
+        hairStyle: transformation.hairStyle,
+        createdAt: transformation.createdAt,
+      })).filter(photo => photo.url); // Filter out photos without URLs
+    }
   };
 
   const photos = getPhotosForTab();
@@ -152,6 +166,24 @@ export default function GalleryPage() {
       {/* Tab Buttons */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div className="flex flex-row justify-center items-center gap-4 mb-6">
+          {/* Side by Side View */}
+        <button
+            onClick={() => {
+              setActiveTab('comparison');
+              setCurrentPage(1);
+            }}
+            className={`flex items-center justify-center gap-3 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === 'comparison'
+                ? 'bg-primary text-white shadow-lg'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+            </svg>
+            <span>Side by Side</span>
+          </button>
+          {/* Original View */}
           <button
             onClick={() => {
               setActiveTab('original');
@@ -171,6 +203,7 @@ export default function GalleryPage() {
             <span>Original Photos</span>
           </button>
 
+          {/* Styled View */}
           <button
             onClick={() => {
               setActiveTab('styled');
@@ -189,6 +222,7 @@ export default function GalleryPage() {
             />
             <span>Styled Photos</span>
           </button>
+          
         </div>
 
         {/* Sort Dropdown */}
@@ -277,7 +311,9 @@ export default function GalleryPage() {
               <p className="text-gray-600 mb-6">
                 {activeTab === 'original'
                   ? "You haven't imported any photos from Google Photos yet."
-                  : "You haven't created any styled photos yet."}
+                  : activeTab === 'styled'
+                  ? "You haven't created any styled photos yet."
+                  : "You haven't created any transformations yet."}
               </p>
               <a
                 href="/editor"
@@ -292,63 +328,158 @@ export default function GalleryPage() {
         {/* Photo Grid */}
         {!loading && !error && photos.length > 0 && (
           <div className="mb-8">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {paginatedPhotos.map((photo) => (
-                <div
-                  key={photo.id}
-                  className="aspect-square bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden group relative"
-                >
-                  <img
-                    src={photo.url}
-                    alt={activeTab === 'original' ? 'Original photo' : 'Styled photo'}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Fallback if image fails to load
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent) {
-                        parent.innerHTML = `
-                          <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs p-2 text-center">
-                            Image unavailable
-                          </div>
-                        `;
-                      }
-                    }}
-                  />
-                  {/* Hover overlay with photo info */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-200 flex items-end opacity-0 group-hover:opacity-100">
-                    <div className="w-full p-2 text-white text-xs">
-                      {photo.hairColor && (
-                        <div className="mb-1">
-                          <span className="font-semibold">Color:</span> {photo.hairColor}
-                        </div>
-                      )}
-                      {photo.hairStyle && (
-                        <div className="mb-1">
-                          <span className="font-semibold">Style:</span> {photo.hairStyle}
-                        </div>
-                      )}
-                      {photo.createdAt && (
-                        <div className="text-gray-300 text-xs">
-                          {new Date(photo.createdAt).toLocaleDateString()}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {/* Delete button */}
-                  <button
-                    onClick={() => handleDelete(photo.id)}
-                    className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                    title="Delete photo"
+            {activeTab === 'comparison' ? (
+              // Side-by-side comparison view
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {paginatedPhotos.map((photo: any) => (
+                  <div
+                    key={photo.id}
+                    className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden group relative"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
-            </div>
+                    {/* Side-by-side container */}
+                    <div className="flex flex-row">
+                      {/* Original photo */}
+                      <div className="flex-1 aspect-square relative">
+                        <img
+                          src={photo.originalUrl}
+                          alt="Original photo"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = `
+                                <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs p-2 text-center bg-gray-100">
+                                  Original unavailable
+                                </div>
+                              `;
+                            }
+                          }}
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs px-2 py-1 text-center">
+                          Before
+                        </div>
+                      </div>
+                      {/* Divider */}
+                      <div className="w-0.5 bg-gray-300"></div>
+                      {/* Transformed photo */}
+                      <div className="flex-1 aspect-square relative">
+                        <img
+                          src={photo.transformedUrl}
+                          alt="Styled photo"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = `
+                                <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs p-2 text-center bg-gray-100">
+                                  Styled unavailable
+                                </div>
+                              `;
+                            }
+                          }}
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs px-2 py-1 text-center">
+                          After
+                        </div>
+                      </div>
+                    </div>
+                    {/* Info overlay on hover */}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <div className="text-white text-sm text-center p-4">
+                        {photo.hairColor && (
+                          <div className="mb-1">
+                            <span className="font-semibold">Color:</span> {photo.hairColor}
+                          </div>
+                        )}
+                        {photo.hairStyle && (
+                          <div className="mb-1">
+                            <span className="font-semibold">Style:</span> {photo.hairStyle}
+                          </div>
+                        )}
+                        {photo.createdAt && (
+                          <div className="text-gray-300 text-xs mt-2">
+                            {new Date(photo.createdAt).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* Delete button */}
+                    <button
+                      onClick={() => handleDelete(photo.id)}
+                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
+                      title="Delete photo"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              // Single photo view (original or styled)
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {paginatedPhotos.map((photo) => (
+                  <div
+                    key={photo.id}
+                    className="aspect-square bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden group relative"
+                  >
+                    <img
+                      src={photo.url}
+                      alt={activeTab === 'original' ? 'Original photo' : 'Styled photo'}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs p-2 text-center">
+                              Image unavailable
+                            </div>
+                          `;
+                        }
+                      }}
+                    />
+                    {/* Hover overlay with photo info */}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-200 flex items-end opacity-0 group-hover:opacity-100">
+                      <div className="w-full p-2 text-white text-xs">
+                        {photo.hairColor && (
+                          <div className="mb-1">
+                            <span className="font-semibold">Color:</span> {photo.hairColor}
+                          </div>
+                        )}
+                        {photo.hairStyle && (
+                          <div className="mb-1">
+                            <span className="font-semibold">Style:</span> {photo.hairStyle}
+                          </div>
+                        )}
+                        {photo.createdAt && (
+                          <div className="text-gray-300 text-xs">
+                            {new Date(photo.createdAt).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* Delete button */}
+                    <button
+                      onClick={() => handleDelete(photo.id)}
+                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      title="Delete photo"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

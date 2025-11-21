@@ -10,7 +10,7 @@ import authMiddleware from './middleware/auth';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.EXPRESS_PORT || 3001;
+const PORT = parseInt(process.env.EXPRESS_PORT || '3001', 10);
 
 // Middleware
 app.use(cors({
@@ -86,9 +86,10 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Express server running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
+const HOST = process.env.HOST || '0.0.0.0';
+app.listen(PORT, HOST, () => {
+  console.log(`Express server running on ${HOST}:${PORT}`);
+  console.log(`Health check: http://${HOST}:${PORT}/health`);
 });
 
 export default app;

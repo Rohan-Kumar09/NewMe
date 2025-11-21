@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { uploadBase64ImageToStorage, isDataUrl } from '../utils/storage';
 
 const router = express.Router();
 
@@ -36,10 +37,27 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
       });
     }
 
+    // If transformedImageUrl is a base64 data URL, upload it to Firebase Storage
+    // Firestore has a 1MB limit per field, and base64 data URLs can exceed this
+    let finalTransformedImageUrl = transformedImageUrl;
+    if (isDataUrl(transformedImageUrl)) {
+      console.log('📤 Uploading base64 image to Firebase Storage...');
+      try {
+        finalTransformedImageUrl = await uploadBase64ImageToStorage(transformedImageUrl, user.userId);
+        console.log('✅ Image uploaded successfully');
+      } catch (uploadError: any) {
+        console.error('❌ Failed to upload image to Storage:', uploadError);
+        return res.status(500).json({
+          error: 'Failed to upload transformed image',
+          message: uploadError.message,
+        });
+      }
+    }
+
     const transformation: Omit<Transformation, 'createdAt' | 'updatedAt'> = {
       userId: user.userId,
       originalImageUrl,
-      transformedImageUrl,
+      transformedImageUrl: finalTransformedImageUrl, // Use the Storage URL instead of data URL
       hairColor: hairColor || null,
       hairStyle: hairStyle || null,
       prompt: prompt || null,

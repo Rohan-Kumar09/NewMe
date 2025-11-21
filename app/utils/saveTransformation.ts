@@ -40,8 +40,7 @@ export async function saveTransformation(
   originalImageUrl: string,
   transformedImageUrl: string,
   hairColor?: string,
-  hairStyle?: string,
-  prompt?: string
+  hairStyle?: string
 ): Promise<SaveTransformationResponse> {
   console.log('[FETCH] Making request to /api/transformations/save');
   
@@ -57,7 +56,6 @@ export async function saveTransformation(
         transformedImageUrl,
         hairColor,
         hairStyle,
-        prompt,
       }),
     });
 

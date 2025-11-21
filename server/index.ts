@@ -17,36 +17,48 @@ app.use(cors({
   origin: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   credentials: true,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Increase body size limit to handle large base64 image data URLs (50MB)
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Initialize Firebase Admin
+let projectId: string | undefined;
 try {
   // Check if Firebase credentials are provided via environment variable (JSON string)
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    projectId = serviceAccount.project_id;
     initializeApp({
       credential: credential.cert(serviceAccount),
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${projectId}.appspot.com`,
     });
   } else if (process.env.FIREBASE_PROJECT_ID) {
     // Use Application Default Credentials (for Google Cloud deployment)
+    projectId = process.env.FIREBASE_PROJECT_ID;
     initializeApp({
-      projectId: process.env.FIREBASE_PROJECT_ID,
+      projectId: projectId,
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${projectId}.appspot.com`,
     });
   } else {
     const connectionString = process.env.FIREBASE_CONNECTION_STRING;
     if (connectionString) {
-      const projectId = connectionString.split(':')[0];
+      projectId = connectionString.split(':')[0];
       console.log(`Using project ID from connection string: ${projectId}`);
       initializeApp({
         projectId: projectId,
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${projectId}.appspot.com`,
       });
     } else {
       console.warn('Firebase credentials not found. Using default credentials.');
-      initializeApp();
+      projectId = process.env.FIREBASE_PROJECT_ID;
+      initializeApp({
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || (projectId ? `${projectId}.appspot.com` : undefined),
+      });
     }
   }
+  const storageBucket = process.env.FIREBASE_STORAGE_BUCKET || (projectId ? `${projectId}.appspot.com` : 'not configured');
   console.log('Firebase Admin initialized successfully');
+  console.log(`Storage bucket: ${storageBucket}`);
 } catch (error) {
   console.error('Error initializing Firebase Admin:', error);
   process.exit(1);

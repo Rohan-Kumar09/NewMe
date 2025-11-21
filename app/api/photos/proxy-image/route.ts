@@ -37,13 +37,31 @@ export async function GET(request: Request) {
 
     console.log('Proxying image:', imageUrl);
 
-    // Fetch the image with authorization header
+    // Google Photos baseUrl requires access token as query parameter
+    // Parse the URL and add access_token as query parameter
+    let authenticatedUrl: string;
+    try {
+      const urlObj = new URL(imageUrl);
+      // Add access_token as query parameter (required for Google Photos baseUrl)
+      urlObj.searchParams.set('access_token', decodedToken);
+      authenticatedUrl = urlObj.toString();
+      console.log('Authenticated URL (token added as query param)');
+    } catch (urlError) {
+      // If URL parsing fails, try appending access_token manually
+      console.warn('URL parsing failed, trying manual append:', urlError);
+      const separator = imageUrl.includes('?') ? '&' : '?';
+      authenticatedUrl = `${imageUrl}${separator}access_token=${encodeURIComponent(decodedToken)}`;
+      console.log('Authenticated URL (token appended manually)');
+    }
+
+    // Fetch the image with access token in URL (and also in header for compatibility)
     let imageRes: Response;
     try {
-      imageRes = await fetch(imageUrl, {
+      imageRes = await fetch(authenticatedUrl, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${decodedToken}`,
+          'Authorization': `Bearer ${decodedToken}`, // Also include in header for compatibility
+          'Referer': new URL(request.url).origin, // Some Google APIs require referer
         },
       });
     } catch (fetchErr) {

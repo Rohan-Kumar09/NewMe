@@ -6,39 +6,37 @@ export function useAnimateOnScroll<T extends HTMLElement>(
  threshold = 0.5
 ) {
  const ref = useRef<T | null>(null);
+ const hasAnimated = useRef(false); // 👈 NEW — ensures it runs only once
 
 
  useEffect(() => {
- const el = ref.current;
- if (!el) return;
+   const el = ref.current;
+   if (!el) return;
 
 
- const observer = new IntersectionObserver(
-   ([entry]) => {
-     if (entry.isIntersecting) {
-       // split by space to pass multiple classes
-       el.classList.add("animate__animated", ...animationClass.split(" "));
+   const observer = new IntersectionObserver(
+     ([entry]) => {
+       if (entry.isIntersecting && !hasAnimated.current) {
+         hasAnimated.current = true; // mark as done
 
 
-       const handleEnd = () => {
-         el.classList.remove("animate__animated", ...animationClass.split(" "));
-       };
+         // apply animation classes
+         el.classList.add("animate__animated", ...animationClass.split(" "));
 
 
-       el.addEventListener("animationend", handleEnd, { once: true });
-     }
-   },
-   { threshold }
- );
+         // stop observing so it never triggers again
+         observer.unobserve(el);
+       }
+     },
+     { threshold }
+   );
 
 
- observer.observe(el);
+   observer.observe(el);
 
 
- return () => observer.disconnect();
-}, [animationClass, threshold]);
-
-
+   return () => observer.disconnect();
+ }, [animationClass, threshold]);
 
 
  return ref;

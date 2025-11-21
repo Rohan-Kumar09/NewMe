@@ -18,7 +18,7 @@ export default function VisionResults({ isOpen, onClose, isLoading, error, label
   if (!isOpen) return null;
 
   return (
-    <div className="w-[310px] bg-white rounded-md shadow-md p-4 mb-4">
+    <div className=" bg-white rounded-md shadow-md p-4 mr-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Vision Results</h3>
         <div className="flex items-center space-x-2">
@@ -100,7 +100,7 @@ export default function VisionResults({ isOpen, onClose, isLoading, error, label
       {!isLoading && !error && labels && (
         <div className="mt-3">
           <div className="text-sm text-gray-600 mb-2">Top labels (description — score)</div>
-          <ul className="list-disc pl-5 space-y-1">
+          <ul className="list-disc pl-5 space-y-1 columns-2">
             {labels.map((l, idx) => (
               <li key={idx} className="text-sm">
                 <strong>{l.description}</strong> — {(l.score * 100).toFixed(1)}%

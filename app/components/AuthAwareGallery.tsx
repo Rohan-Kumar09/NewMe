@@ -32,7 +32,7 @@ export default function AuthAwareGallery() {
   return (
     <Link
       href="/gallery"
-      className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors duration-200 rounded-md hover:bg-gray-50"
+      className="inline-flex items-center mr-10 px-4 py-2 text-xl font-semibold sm:text-lg text-gray-700 hover:text-primary transition-colors duration-200 rounded-md hover:bg-gray-50"
     >
       Gallery
     </Link>

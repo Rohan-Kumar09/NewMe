@@ -397,8 +397,8 @@ export default function EditorPage() {
       {/* MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col overflow-y-auto">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-8 py-6">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+        <div className="bg-white border-b border-gray-200 px-8 py-4">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1">
             Experiment and Get Creative
           </h1>
           <p className="text-lg text-gray-600">
@@ -406,99 +406,118 @@ export default function EditorPage() {
           </p>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 p-8">
-          <div className="max-w-6xl mx-auto">
-            {/* Image and Form Container */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-              <div className="grid md:grid-cols-2 p-8 gap-8 relative">
-                {/* Left Side - Image */}
-                <div className="flex flex-col items-center md:border-r md:border-gray-200 md:pr-8">
-                  <div className="w-full max-w-md aspect-square bg-gray-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden relative border border-gray-200">
-                    {imageDisplay}
-                  </div>
-
-                  <button
-                    onClick={() => setShowPhotoPicker(true)}
-                    className="w-full max-w-md px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Import Photos
-                  </button>
-
-                  <p className="mt-4 text-sm text-gray-600 text-center max-w-md">
-                    This represents your current look. Customize the options on the right to see changes.
-                  </p>
-                </div>
-
-                {/* Right Side - Form */}
-                <div className="flex flex-col justify-center md:pl-8">
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                    What would you like to customize?
-                  </h2>
-
-                  <div className="space-y-6">
-                    {/* Hair color input */}
-                    <label className="block">
-                      <div className="flex items-center gap-3 mb-2">
-                        <img
-                          src="/images/color_wheel.png"
-                          alt="Color Wheel"
-                          className="w-6 h-6 object-contain"
-                        />
-                        <span className="text-sm font-medium text-gray-700">Hair Color</span>
-                      </div>
-                      <input
-                        value={color}
-                        onChange={(e) => setColor(e.target.value)}
-                        placeholder="e.g. Pink, Blonde, Blue"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
-                      />
-                    </label>
-
-                    {/* Hairstyle input */}
-                    <label className="block">
-                      <div className="flex items-center gap-3 mb-2">
-                        <img
-                          src="/images/comb_and_scissors.png"
-                          alt="Comb and Scissors"
-                          className="w-6 h-6 object-contain"
-                        />
-                        <span className="text-sm font-medium text-gray-700">Hairstyle</span>
-                      </div>
-                      <input
-                        value={style}
-                        onChange={(e) => setStyle(e.target.value)}
-                        placeholder="e.g. Mohawk, No beard, Bob Cut"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
-                      />
-                    </label>
-
-                    {/* Apply Button */}
-                    <button
-                      onClick={() => {
-                        generateWithGemini();
-                        setIsApplied(true);
-                      }}
-                      disabled={isVisionLoading || !selectedPhoto || (visionValidation?.isValid === false) || isGenerating}
-                      className={`w-full px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                        isVisionLoading || !selectedPhoto || (visionValidation?.isValid === false) || isGenerating
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-primary hover:bg-primary-dark text-white shadow-md hover:shadow-lg transform hover:scale-105"
-                      }`}
-                      title={visionValidation?.isValid === false ? visionValidation.errorMessage : ''}
-                    >
-                      {isVisionLoading ? "Analyzing image..." : isGenerating ? "Generating..." : "Apply Transformation"}
-                    </button>
-                  </div>
-                </div>
-              </div>
+        {/* Vision Results and Comparison Container */}
+        {isApplied && <div className="px-3 py-3 ">
+          <div className="grid md:grid-cols-2">
+            {/* Vision Results */}
+            <div>
+              <VisionResults
+                isOpen={showVisionPanel}
+                onClose={() => setShowVisionPanel(false)}
+                isLoading={isVisionLoading}
+                error={visionError}
+                labels={visionData?.labels}
+                raw={visionData?.visionResponse}
+                validation={visionValidation}
+              />
             </div>
 
-            {/* Action Buttons */}
-            <div className="mt-8 flex items-center justify-center gap-4">
+            {/* Side-by-Side Comparison - Only show when transformation is applied */}
+            {originalPhotoUrl && selectedPhoto && (
+              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                  </svg>
+                  Before & After
+                </h3>
+                <div className="flex flex-row gap-2 bg-gray-50 rounded-lg p-2">
+                  {/* Original Photo */}
+                  <div className="flex-1 relative">
+                    <div className="aspect-square bg-white rounded-lg overflow-hidden border-2 border-gray-200 shadow-sm">
+                      <img
+                        src={originalPhotoUrl}
+                        alt="Original photo"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent) {
+                            parent.innerHTML = `
+                              <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs p-2 text-center">
+                                Original unavailable
+                              </div>
+                            `;
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded text-center font-medium">
+                      Before
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="w-0.5 bg-gray-300 my-2"></div>
+
+                  {/* Transformed Photo */}
+                  <div className="flex-1 relative">
+                    <div className="aspect-square bg-white rounded-lg overflow-hidden border-2 border-primary shadow-sm">
+                      <img
+                        src={selectedPhoto}
+                        alt="Transformed photo"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent) {
+                            parent.innerHTML = `
+                              <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs p-2 text-center">
+                                Transformed unavailable
+                              </div>
+                            `;
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="absolute bottom-2 left-2 right-2 bg-primary bg-opacity-90 text-white text-xs px-2 py-1 rounded text-center font-medium">
+                      After
+                    </div>
+                  </div>
+                </div>
+
+                {/* Transformation Details */}
+                {(color || style) && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex flex-wrap gap-3 text-sm">
+                      {color && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-lg">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                          </svg>
+                          <span className="font-medium">Color: {color}</span>
+                        </div>
+                      )}
+                      {style && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary/10 text-secondary rounded-lg">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                          </svg>
+                          <span className="font-medium">Style: {style}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>}
+
+        {/* Action Buttons */}
+        {isApplied && <div className="mt-2 mb-2 flex items-center justify-center gap-4">
               <button 
                 className="px-6 py-3 bg-white border border-red-300 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition-colors flex items-center gap-2"
                 onClick={() => {
@@ -574,20 +593,102 @@ export default function EditorPage() {
                   </>
                 )}
               </button>
+            </div>}
+
+        {/* Main Content */}
+        <div className="flex-1 p-3">
+          <div className="max-w-6xl mx-auto">
+            {/* Image and Form Container */}
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="grid md:grid-cols-2 p-8 gap-8 relative">
+                {/* Left Side - Image */}
+                <div className="flex flex-col items-center md:border-r md:border-gray-200 md:pr-8">
+                  <div className="w-full max-w-md aspect-square bg-gray-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden relative border border-gray-200">
+                    {imageDisplay}
+                  </div>
+
+                  <button
+                    onClick={() => setShowPhotoPicker(true)}
+                    className="w-full max-w-md px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Import Photos
+                  </button>
+
+                  <p className="mt-2 text-sm text-gray-600 text-center max-w-md">
+                    This represents your current look. Customize the options on the right to see changes.
+                  </p>
+                </div>
+
+                {/* Right Side - Form */}
+                <div className="flex flex-col justify-center md:pl-8">
+                  <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                    What would you like to customize?
+                  </h2>
+
+                  <div className="space-y-6">
+                    {/* Hair color input */}
+                    <label className="block">
+                      <div className="flex items-center gap-3 mb-2">
+                        <img
+                          src="/images/color_wheel.png"
+                          alt="Color Wheel"
+                          className="w-6 h-6 object-contain"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Hair Color</span>
+                      </div>
+                      <input
+                        value={color}
+                        onChange={(e) => setColor(e.target.value)}
+                        placeholder="e.g. Pink, Blonde, Blue"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
+                      />
+                    </label>
+
+                    {/* Hairstyle input */}
+                    <label className="block">
+                      <div className="flex items-center gap-3 mb-2">
+                        <img
+                          src="/images/comb_and_scissors.png"
+                          alt="Comb and Scissors"
+                          className="w-6 h-6 object-contain"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Hairstyle</span>
+                      </div>
+                      <input
+                        value={style}
+                        onChange={(e) => setStyle(e.target.value)}
+                        placeholder="e.g. Mohawk, No beard, Bob Cut"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
+                      />
+                    </label>
+
+                    {/* Apply Button */}
+                    <button
+                      onClick={() => {
+                        generateWithGemini();
+                        setIsApplied(true);
+                      }}
+                      disabled={isVisionLoading || !selectedPhoto || (visionValidation?.isValid === false) || isGenerating}
+                      className={`w-full px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                        isVisionLoading || !selectedPhoto || (visionValidation?.isValid === false) || isGenerating
+                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          : "bg-primary hover:bg-primary-dark text-white shadow-md hover:shadow-lg transform hover:scale-105"
+                      }`}
+                      title={visionValidation?.isValid === false ? visionValidation.errorMessage : ''}
+                    >
+                      {isVisionLoading ? "Analyzing image..." : isGenerating ? "Generating..." : "Apply Transformation"}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Vision Results Container */}
-            <div className="mt-8">
-              <VisionResults
-                isOpen={showVisionPanel}
-                onClose={() => setShowVisionPanel(false)}
-                isLoading={isVisionLoading}
-                error={visionError}
-                labels={visionData?.labels}
-                raw={visionData?.visionResponse}
-                validation={visionValidation}
-              />
-            </div>
+            
+
+            
           </div>
         </div>
       </div>

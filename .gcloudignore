@@ -1,0 +1,48 @@
+# This file specifies files that are *not* uploaded to Google Cloud
+# using gcloud. It follows the same syntax as .gitignore
+
+# Dependencies
+node_modules/
+
+# Build outputs (will be built in Docker)
+.next/
+dist/
+build/
+out/
+
+# Environment files (use App Engine environment variables instead)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.log
+.cache/
+.turbo/
+
+# Docker (not needed in App Engine)
+Dockerfile
+.dockerignore
+docker-compose.yml
+

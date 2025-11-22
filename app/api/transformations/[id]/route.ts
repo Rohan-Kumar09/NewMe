@@ -8,10 +8,10 @@ const EXPRESS_API_URL = process.env.EXPRESS_API_URL || 'http://localhost:3001';
  */
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const cookies = request.headers.get('cookie') || '';
 
     const response = await fetch(`${EXPRESS_API_URL}/api/transformations/${id}`, {

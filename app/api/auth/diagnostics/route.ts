@@ -60,8 +60,27 @@ export async function GET(request: Request) {
         GOOGLE_CLIENT_SECRET: !!process.env.GOOGLE_CLIENT_SECRET,
         GOOGLE_REDIRECT_URI: !!process.env.GOOGLE_REDIRECT_URI,
         GOOGLE_API_KEY: !!process.env.GOOGLE_API_KEY,
+        GOOGLE_APPLICATION_CREDENTIALS: !!process.env.GOOGLE_APPLICATION_CREDENTIALS,
       },
       hasPhotosScope: tokenInfo?.scope?.includes('photoslibrary') || false,
+      apiEndpoints: {
+        gemini: {
+          configured: !!process.env.GOOGLE_API_KEY,
+          maxDuration: 300, // 5 minutes
+        },
+        vision: {
+          configured: !!process.env.GOOGLE_API_KEY,
+          maxDuration: 120, // 2 minutes
+          sdkAvailable: (() => {
+            try {
+              require.resolve('@google-cloud/vision');
+              return true;
+            } catch {
+              return false;
+            }
+          })(),
+        },
+      },
     });
   } catch (e) {
     console.error('Diagnostics error:', e);

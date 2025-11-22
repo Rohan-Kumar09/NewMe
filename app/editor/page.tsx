@@ -106,11 +106,18 @@ export default function EditorPage() {
     setVisionError(null);
     setIsVisionLoading(true);
     try {
+      // Create AbortController with 2 minute timeout for Vision API
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minutes
+      
       const res = await fetch('/api/photos/vision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageUrl: photoUrl }),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
         const text = await res.text();
@@ -137,7 +144,11 @@ export default function EditorPage() {
       setShowVisionPanel(true); // Auto-open panel on successful analysis
     } catch (err) {
       console.error('❌ [VISION] Error', err);
-      setVisionError(err instanceof Error ? err.message : String(err));
+      if (err instanceof Error && err.name === 'AbortError') {
+        setVisionError('Vision API request timed out after 2 minutes. Please try again with a smaller image.');
+      } else {
+        setVisionError(err instanceof Error ? err.message : String(err));
+      }
       setVisionValidation(null);
     } finally {
       setIsVisionLoading(false);
@@ -246,6 +257,10 @@ export default function EditorPage() {
       
       console.log('📝 [GEMINI] Prompt:', prompt);
 
+      // Create AbortController with 5 minute timeout for Gemini API (image generation can take long)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes
+      
       const res = await fetch('/api/gemini/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -255,7 +270,10 @@ export default function EditorPage() {
           hairColor: color,
           hairStyle: style,
         }),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
         const errorData = await res.json();
@@ -273,7 +291,11 @@ export default function EditorPage() {
       }
     } catch (err) {
       console.error('❌ [GEMINI] Error:', err);
-      setGeminiError(err instanceof Error ? err.message : String(err));
+      if (err instanceof Error && err.name === 'AbortError') {
+        setGeminiError('Image generation timed out after 5 minutes. Please try again - this can happen with complex transformations.');
+      } else {
+        setGeminiError(err instanceof Error ? err.message : String(err));
+      }
     } finally {
       setIsGenerating(false);
     }

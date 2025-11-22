@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 
+// Increase timeout to 2 minutes (120 seconds) for Vision API calls
+// Vision API can sometimes take longer for complex images
+export const maxDuration = 120; // 2 minutes
+
 function parseCookies(cookieHeader: string | null) {
   const map: Record<string, string> = {};
   if (!cookieHeader) return map;
@@ -21,12 +25,23 @@ export async function POST(request: Request) {
     const accessToken = cookies['access_token'];
 
     if (!accessToken) {
+      console.error('❌ [VISION] Missing access_token cookie');
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const origin = new URL(request.url).origin;
 
-    const body = await request.json();
+    let body: any;
+    try {
+      body = await request.json();
+    } catch (jsonError: any) {
+      console.error('❌ [VISION] JSON parse error:', jsonError);
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body', details: jsonError.message },
+        { status: 400 }
+      );
+    }
+
     const { imageUrl } = body;
 
     if (!imageUrl) {
@@ -37,12 +52,28 @@ export async function POST(request: Request) {
     const absoluteUrl = imageUrl.startsWith('http') ? imageUrl : `${origin}${imageUrl}`;
 
     // Fetch proxied image from our own server, forwarding cookies so /api/photos/proxy-image can use them
-    const imageRes = await fetch(absoluteUrl, {
-      method: 'GET',
-      headers: {
-        cookie: cookieHeader || '',
-      },
-    });
+    // Create AbortController with 30 second timeout for image fetch
+    const imageController = new AbortController();
+    const imageTimeoutId = setTimeout(() => imageController.abort(), 30000); // 30 seconds
+    
+    let imageRes: Response;
+    try {
+      imageRes = await fetch(absoluteUrl, {
+        method: 'GET',
+        headers: {
+          cookie: cookieHeader || '',
+        },
+        signal: imageController.signal,
+      });
+      clearTimeout(imageTimeoutId);
+    } catch (imageFetchError: any) {
+      clearTimeout(imageTimeoutId);
+      if (imageFetchError.name === 'AbortError') {
+        console.error('Image fetch timed out after 30 seconds');
+        return NextResponse.json({ error: 'Failed to fetch image: request timed out' }, { status: 504 });
+      }
+      throw imageFetchError;
+    }
 
     if (!imageRes.ok) {
       const text = await imageRes.text();
@@ -50,8 +81,31 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to fetch proxied image' }, { status: 502 });
     }
 
-    const arrayBuf = await imageRes.arrayBuffer();
-    const imageBuffer = Buffer.from(arrayBuf);
+    let arrayBuf: ArrayBuffer;
+    let imageBuffer: Buffer;
+    
+    try {
+      arrayBuf = await imageRes.arrayBuffer();
+      imageBuffer = Buffer.from(arrayBuf);
+      
+      // Check image size (Vision API has limits)
+      const maxSize = 20 * 1024 * 1024; // 20MB
+      if (imageBuffer.length > maxSize) {
+        console.error('❌ [VISION] Image too large:', imageBuffer.length, 'bytes (max:', maxSize, ')');
+        return NextResponse.json(
+          { error: 'Image too large', details: `Image size ${Math.round(imageBuffer.length / 1024 / 1024)}MB exceeds maximum of 20MB` },
+          { status: 400 }
+        );
+      }
+      
+      console.log('✅ [VISION] Image fetched, size:', imageBuffer.length, 'bytes');
+    } catch (bufferError: any) {
+      console.error('❌ [VISION] Error processing image buffer:', bufferError);
+      return NextResponse.json(
+        { error: 'Failed to process image', details: bufferError.message },
+        { status: 500 }
+      );
+    }
 
     // Try to use @google-cloud/vision if installed; otherwise fall back to REST using API key
     try {
@@ -87,7 +141,17 @@ export async function POST(request: Request) {
       }
 
       try {
-        const base64 = imageBuffer.toString('base64');
+        let base64: string;
+        try {
+          base64 = imageBuffer.toString('base64');
+        } catch (base64Error: any) {
+          console.error('❌ [VISION] Base64 encoding error:', base64Error);
+          return NextResponse.json(
+            { error: 'Failed to encode image to base64', details: base64Error.message },
+            { status: 500 }
+          );
+        }
+        
         const restBody = {
           requests: [
             {
@@ -100,11 +164,27 @@ export async function POST(request: Request) {
           ],
         };
 
-        const visionRes = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${encodeURIComponent(apiKey)}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(restBody),
-        });
+        // Create AbortController with 90 second timeout (slightly less than maxDuration)
+        const visionController = new AbortController();
+        const visionTimeoutId = setTimeout(() => visionController.abort(), 90000); // 90 seconds
+        
+        let visionRes: Response;
+        try {
+          visionRes = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(restBody),
+            signal: visionController.signal,
+          });
+          clearTimeout(visionTimeoutId);
+        } catch (visionFetchError: any) {
+          clearTimeout(visionTimeoutId);
+          if (visionFetchError.name === 'AbortError') {
+            console.error('Vision REST call timed out after 90 seconds');
+            return NextResponse.json({ error: 'Vision API request timed out. Please try again with a smaller image.' }, { status: 504 });
+          }
+          throw visionFetchError;
+        }
 
         if (!visionRes.ok) {
           const text = await visionRes.text();
@@ -123,7 +203,43 @@ export async function POST(request: Request) {
       }
     }
   } catch (e: any) {
-    console.error('Vision route error:', e?.message || e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    // Enhanced error logging
+    console.error('❌ [VISION] Unhandled error:', {
+      message: e?.message || String(e),
+      name: e?.name,
+      stack: e?.stack,
+      code: e?.code,
+      cause: e?.cause,
+    });
+    
+    // Provide more specific error messages
+    let errorMessage = 'Failed to process vision request';
+    let errorDetails = String(e?.message || e);
+    
+    if (e?.name === 'TypeError' && e?.message?.includes('fetch')) {
+      errorMessage = 'Network error: Failed to connect to Vision API';
+      errorDetails = 'Check your internet connection and API key configuration';
+    } else if (e?.code === 'ENOTFOUND' || e?.code === 'ECONNREFUSED') {
+      errorMessage = 'Network error: Cannot reach Vision API';
+      errorDetails = 'API endpoint may be unreachable or API key is invalid';
+    } else if (e?.message?.includes('JSON')) {
+      errorMessage = 'Invalid response from Vision API';
+      errorDetails = 'The API returned an unexpected response format';
+    } else if (e?.message?.includes('require')) {
+      errorMessage = 'Vision SDK initialization error';
+      errorDetails = 'Failed to load @google-cloud/vision package';
+    }
+    
+    return NextResponse.json(
+      { 
+        error: errorMessage,
+        details: errorDetails,
+        ...(process.env.NODE_ENV === 'development' && { 
+          stack: e?.stack,
+          fullError: String(e)
+        })
+      },
+      { status: 500 }
+    );
   }
 }

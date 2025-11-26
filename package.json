@@ -16,6 +16,7 @@
     "@fontsource/comfortaa": "^5.2.8",
     "@fontsource/lexend": "^5.2.11",
     "@google-cloud/vision": "^5.3.4",
+    "animate.css": "^4.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",

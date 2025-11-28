@@ -1,17 +1,17 @@
-# server/Dockerfile - TS backend (Cloud Run: newme-server)
+# Dockerfile.server - TS backend using root package.json
 
 # ---------- Build stage ----------
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Install dependencies (full, including devDeps for tsc)
+# Install deps from root package.json
 COPY package*.json ./
 RUN npm install
 
-# Copy entire repo so server can access any shared code
+# Copy the entire repo (server code + shared code)
 COPY . .
 
-# Uses your script: "build:server": "tsc --project server/tsconfig.json"
+# Build backend TS → JS (uses root script "build:server")
 RUN npm run build:server
 
 # ---------- Runtime stage ----------
@@ -21,7 +21,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=8080
 
-# Only runtime deps
+# Install only production deps
 COPY package*.json ./
 RUN npm install --omit=dev
 
@@ -30,5 +30,5 @@ COPY --from=builder /app/server/dist ./server/dist
 
 EXPOSE 8080
 
-# Uses your script: "start:server": "node server/dist/index.js"
+# Uses your script "start:server": "node server/dist/index.js"
 CMD ["npm", "run", "start:server"]

@@ -12,6 +12,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : Number(process.env.EXPRESS_PORT || 3001);
 
+console.log("ENV DEBUG =>", {
+  FIREBASE_SERVICE_ACCOUNT: process.env.FIREBASE_SERVICE_ACCOUNT ? "SET" : "MISSING",
+  FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
+  FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ? "SET" : "MISSING",
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ? "SET" : "MISSING",
+});
+
 // Middleware
 app.use(cors({
   origin: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',

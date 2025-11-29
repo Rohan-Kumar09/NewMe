@@ -49,8 +49,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Image URL required' }, { status: 400 });
     }
 
-    // If a relative/proxied path was provided (e.g. /api/photos/proxy-image?...), make absolute
-    const absoluteUrl = imageUrl.startsWith('http') ? imageUrl : `${origin}${imageUrl}`;
+    // Decide how to fetch the image
+    // - If it's a path like /api/photos/proxy-image?... → call the same container via localhost
+    // - If it's already an external URL (e.g. Google Photos baseUrl) → fetch it directly
+    const port = process.env.PORT || '8080';
+
+    let absoluteUrl: string;
+
+    if (imageUrl.startsWith('/')) {
+      // Relative path inside the same app
+      absoluteUrl = `http://127.0.0.1:${port}${imageUrl}`;
+    } else if (imageUrl.startsWith('http')) {
+      const urlObj = new URL(imageUrl);
+
+      // If it's our own Cloud Run host, rewrite to localhost to avoid external egress
+      if (urlObj.hostname.endsWith('.run.app')) {
+        absoluteUrl = `http://127.0.0.1:${port}${urlObj.pathname}${urlObj.search}`;
+      } else {
+        // External URL (e.g. Google Photos) – fetch as-is
+        absoluteUrl = imageUrl;
+      }
+    } else {
+      // Fallback for any weird relative cases
+      absoluteUrl = `http://127.0.0.1:${port}/${imageUrl.replace(/^\/+/, '')}`;
+    }
+
+    console.log('[VISION] Fetching image from:', absoluteUrl);
 
     // Fetch proxied image from our own server, forwarding cookies so /api/photos/proxy-image can use them
     // Create AbortController with 30 second timeout for image fetch

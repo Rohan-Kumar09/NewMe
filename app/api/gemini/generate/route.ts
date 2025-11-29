@@ -5,6 +5,14 @@ import { NextResponse } from 'next/server';
 export const maxDuration = 300; // 5 minutes
 export const runtime = "nodejs";
 
+console.log(
+  '🔑 [GEMINI] GOOGLE_API_KEY present:',
+  !!process.env.GOOGLE_API_KEY,
+  'length:',
+  process.env.GOOGLE_API_KEY?.length ?? 0
+);
+
+
 function parseCookies(cookieHeader: string | null) {
   const map: Record<string, string> = {};
   if (!cookieHeader) return map;

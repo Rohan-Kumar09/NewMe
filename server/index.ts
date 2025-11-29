@@ -10,7 +10,7 @@ import authMiddleware from './middleware/auth';
 dotenv.config();
 
 const app = express();
-const PORT = parseInt(process.env.EXPRESS_PORT || '3001', 10);
+const PORT = process.env.PORT ? Number(process.env.PORT) : Number(process.env.EXPRESS_PORT || 3001);
 
 // Middleware
 app.use(cors({

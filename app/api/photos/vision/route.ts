@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 // Increase timeout to 2 minutes (120 seconds) for Vision API calls
 // Vision API can sometimes take longer for complex images
 export const maxDuration = 120; // 2 minutes
+export const runtime = "nodejs";
 
 function parseCookies(cookieHeader: string | null) {
   const map: Record<string, string> = {};

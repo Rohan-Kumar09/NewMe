@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const runtime = "nodejs";
+
 function parseCookies(cookieHeader: string | null) {
   const map: Record<string, string> = {};
   if (!cookieHeader) return map;

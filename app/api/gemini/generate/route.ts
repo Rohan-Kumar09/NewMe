@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 // Increase timeout to 5 minutes (300 seconds) for Gemini API calls
 // Gemini image generation can take a long time
 export const maxDuration = 300; // 5 minutes
+export const runtime = "nodejs";
 
 function parseCookies(cookieHeader: string | null) {
   const map: Record<string, string> = {};

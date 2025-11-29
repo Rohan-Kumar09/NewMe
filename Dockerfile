@@ -8,7 +8,10 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+
+# CRITICAL FIX:
+COPY ./ ./
+
 RUN npm run build
 
 FROM node:20-alpine AS runner
@@ -20,4 +23,5 @@ ENV PORT=8080
 COPY --from=builder /app ./
 
 EXPOSE 8080
+
 CMD ["npm", "run", "start"]
